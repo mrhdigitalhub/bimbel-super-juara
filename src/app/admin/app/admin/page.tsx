@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null as any;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 function randomCode(len=4){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let r=""; for(let i=0;i<len;i++) r+=c[Math.floor(Math.random()*c.length)]; return r; }
 
 export default function Admin(){
@@ -13,18 +13,17 @@ export default function Admin(){
   const [result,setResult]=useState<any[]>([]);
   const [log,setLog]=useState("");
   const [stats,setStats]=useState<any>({total:0});
+  // SETTINGS
   const [harga,setHarga]=useState(17000);
   const [durasi,setDurasi]=useState(90);
   const [saving,setSaving]=useState(false);
 
   useEffect(()=>{
-    if(!supabase) return;
     loadStats();
     loadSettings();
   },[]);
 
   const loadSettings = async()=>{
-    if(!supabase) return;
     const { data } = await supabase.from("settings").select("*");
     if(data){
       data.forEach((r:any)=>{
@@ -35,7 +34,6 @@ export default function Admin(){
   };
 
   const loadStats = async()=>{
-    if(!supabase) return;
     const { data } = await supabase.from("vouchers").select("paket, nominal, status");
     if(data){
       const grouped:any={};
@@ -51,7 +49,6 @@ export default function Admin(){
   };
 
   const saveSettings = async()=>{
-    if(!supabase) return;
     setSaving(true);
     const { error: e1 } = await supabase.from("settings").upsert({ key:"harga_default", value: String(harga) });
     const { error: e2 } = await supabase.from("settings").upsert({ key:"durasi_hari", value: String(durasi) });
@@ -61,7 +58,6 @@ export default function Admin(){
   };
 
   const generate = async()=>{
-    if(!supabase) return;
     setLoading(true);
     setLog(`🚀 Generate ${jumlah} voucher ${paket.toUpperCase()} @ Rp ${harga.toLocaleString('id-ID')} - ${durasi} hari...`);
     const batch=[];
@@ -78,7 +74,6 @@ export default function Admin(){
   };
 
   const fixHargaLama = async()=>{
-    if(!supabase) return;
     if(!confirm(`Update SEMUA voucher yang masih 150k atau harga lama jadi Rp ${harga.toLocaleString('id-ID')}?`)) return;
     const { error } = await supabase.from("vouchers").update({ nominal: harga }).neq("nominal", harga);
     if(error) alert("Error: "+error.message); else { alert(`✅ Semua voucher udah jadi Rp ${harga.toLocaleString('id-ID')}!`); loadStats(); }
@@ -100,6 +95,7 @@ export default function Admin(){
           <div className="bg-[#22C55E] text-black rounded-full px-3 py-1 font-black text-[11px]">TOTAL {stats.total||701} VOUCHER</div>
         </header>
 
+        {/* SETTINGS PANEL - BARU! */}
         <div className="bg-gradient-to-br from-[#1A1A1A] to-black border-[3px] border-[#22C55E] rounded-[16px] p-5 mb-6 shadow-[0_0_20px_rgba(34,197,94,0.2)]">
           <h2 className="font-black text-[#22C55E] text-[13px] tracking-widest mb-4">⚙️ SETTING GLOBAL - HARGA & MASA AKTIF (BISA DIUBAH KAPAN AJA)</h2>
           <div className="grid md:grid-cols-3 gap-4">
@@ -111,11 +107,9 @@ export default function Admin(){
             <div>
               <label className="text-[10px] font-black text-[#FFD700] tracking-widest">MASA AKTIF (HARI)</label>
               <select value={durasi} onChange={e=>setDurasi(parseInt(e.target.value))} className="mt-2 w-full h-12 bg-[#1E1E1E] border-2 border-[#22C55E]/40 rounded-[12px] px-3 font-black text-[#22C55E] text-[16px]">
-                <option value={30}>30 Hari (1 Bulan)</option>
-                <option value={60}>60 Hari (2 Bulan)</option>
-                <option value={90}>90 Hari (3 Bulan) - REKOMENDASI</option>
-                <option value={180}>180 Hari (6 Bulan)</option>
-                <option value={365}>365 Hari (1 Tahun)</option>
+                <option value={90}>3 Bulan (90 Hari) - REKOMENDASI</option>
+                <option value={180}>6 Bulan (180 Hari)</option>
+                <option value={365}>12 Bulan (365 Hari / 1 Tahun)</option>
               </select>
               <p className="text-[10px] text-[#22C55E] font-black mt-1">{durasi} hari = {Math.round(durasi/30)} bulan</p>
             </div>
@@ -126,6 +120,7 @@ export default function Admin(){
           </div>
         </div>
 
+        {/* STATS */}
         {stats.grouped && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {Object.entries(stats.grouped).map(([k,v]:any)=>(
