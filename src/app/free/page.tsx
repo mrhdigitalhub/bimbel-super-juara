@@ -2,24 +2,32 @@
 import Link from 'next/link'
 
 const FREE_DATA = [
-  { id: 'bsj-sd1', kelas: 'SD 1', icon: '🌈', warna: 'from-pink-400 to-orange-400', total: 30, desc: 'Matematika, B.Indo, IPA' },
-  { id: 'bsj-sd2', kelas: 'SD 2', icon: '🚀', warna: 'from-blue-400 to-cyan-400', total: 30, desc: 'Matematika, B.Indo, IPA' },
-  { id: 'bsj-sd3', kelas: 'SD 3', icon: '⭐', warna: 'from-purple-400 to-pink-400', total: 30, desc: 'Matematika, B.Indo, IPA' },
-  { id: 'bsj-sd4', kelas: 'SD 4', icon: '🎯', warna: 'from-green-400 to-emerald-500', total: 30, desc: 'Matematika, B.Indo, IPA' },
-  { id: 'bsj-sd5', kelas: 'SD 5', icon: '🔥', warna: 'from-orange-400 to-red-500', total: 30, desc: 'Matematika, B.Indo, IPA' },
-  { id: 'bsj-sd6', kelas: 'SD 6', icon: '👑', warna: 'from-yellow-400 to-amber-500', total: 30, desc: 'Matematika, B.Indo, IPA' },
+  { id: 'bsj-sd1', kelas: 'SD 1', icon: '🌈', warna: 'from-pink-400 to-orange-400', total: 30 },
+  { id: 'bsj-sd2', kelas: 'SD 2', icon: '🚀', warna: 'from-blue-400 to-cyan-400', total: 30 },
+  { id: 'bsj-sd3', kelas: 'SD 3', icon: '⭐', warna: 'from-purple-400 to-pink-400', total: 30 },
+  { id: 'bsj-sd4', kelas: 'SD 4', icon: '🎯', warna: 'from-green-400 to-emerald-500', total: 30 },
+  { id: 'bsj-sd5', kelas: 'SD 5', icon: '🔥', warna: 'from-orange-400 to-red-500', total: 30 },
+  { id: 'bsj-sd6', kelas: 'SD 6', icon: '👑', warna: 'from-yellow-400 to-amber-500', total: 30 },
 ]
 
 export default function FreePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 py-6 px-4">
       <div className="max-w-6xl mx-auto">
-        {/* LOGO MRH HEADER */}
-        <div className="flex flex-col items-center mb-8">
-          <img src="/logo-mrh-transparan.png" alt="MRH DigitalHub" className="h-20 md:h-24 object-contain mb-3" onError={(e) => (e.currentTarget.style.display='none')} />
-          <div className="bg-white border border-slate-200 rounded-full px-4 py-1 flex items-center gap-2 shadow-sm">
+        {/* LOGO MRH FIX - PAKAI mrh-logo.png YANG SUDAH ADA DI PUBLIC */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="bg-[#FFF9D6] border-2 border-amber-200 rounded-2xl px-6 py-4 shadow-md flex items-center gap-4">
+            <img src="/mrh-logo.png" alt="MRH DigitalHub" className="h-16 md:h-20 object-contain" />
+            <div className="hidden md:block h-12 w-[2px] bg-amber-300"></div>
+            <div className="text-left">
+              <div className="text-2xl font-black text-[#0B8A4A] tracking-tight">BIMBEL SUPER JUARA</div>
+              <div className="text-sm font-bold text-slate-700 -mt-1">Belajar lebih terarah, Hadapi TKA Lebih Percaya Diri.</div>
+              <div className="text-[11px] font-bold text-slate-500 mt-1">MRH DigitalHub • Konsultan | Sertifikasi | DigitalHub</div>
+            </div>
+          </div>
+          <div className="mt-3 bg-white border border-slate-200 rounded-full px-4 py-1 flex items-center gap-2 shadow-sm">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs font-bold text-slate-600">MRH DigitalHub • Bimbel Super Juara</span>
+            <span className="text-xs font-bold text-slate-600">MRH DigitalHub • Bimbel Super Juara • Bersinergi Bertransformasi Industri Modern</span>
           </div>
         </div>
 
@@ -33,24 +41,21 @@ export default function FreePage() {
           {FREE_DATA.map((paket) => (
             <Link key={paket.id} href={`/free/${paket.id}`}>
               <div className={`bg-gradient-to-br ${paket.warna} p-[2px] rounded-2xl hover:scale-[1.03] hover:shadow-xl transition-all duration-300 shadow-lg group`}>
-                <div className="bg-white rounded-[14px] p-6 h-full relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-slate-50 to-transparent rounded-full -mr-10 -mt-10"></div>
-                  <div className="relative">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="text-4xl group-hover:scale-110 transition-transform">{paket.icon}</div>
-                      <span className="bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full tracking-wider">FREE</span>
-                    </div>
-                    <h3 className="font-black text-xl text-slate-800">Bimbel {paket.kelas}</h3>
-                    <p className="text-sm text-slate-500 mt-1 font-medium">{paket.desc}</p>
-                    <div className="mt-5 flex items-center justify-between">
-                      <span className="text-2xl font-black text-slate-800">{paket.total} Soal</span>
-                      <span className="bg-slate-900 group-hover:bg-black text-white px-5 py-2 rounded-full text-sm font-bold transition-colors">Mulai →</span>
-                    </div>
-                    <div className="mt-3 flex items-center gap-2 text-xs text-green-600 font-bold">
-                      <span className="bg-green-50 px-2 py-1 rounded-full">✓ 10 MTK</span>
-                      <span className="bg-blue-50 px-2 py-1 rounded-full">✓ 10 B.Indo</span>
-                      <span className="bg-purple-50 px-2 py-1 rounded-full">✓ 10 IPA</span>
-                    </div>
+                <div className="bg-white rounded-[14px] p-6 h-full">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="text-4xl group-hover:scale-110 transition-transform">{paket.icon}</div>
+                    <span className="bg-green-500 text-white text-[10px] font-black px-2.5 py-1 rounded-full">FREE</span>
+                  </div>
+                  <h3 className="font-black text-xl text-slate-800">Bimbel {paket.kelas}</h3>
+                  <p className="text-sm text-slate-500 mt-1">Matematika, B.Indo, IPA</p>
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="text-2xl font-black text-slate-800">{paket.total} Soal</span>
+                    <span className="bg-slate-900 group-hover:bg-black text-white px-5 py-2 rounded-full text-sm font-bold">Mulai →</span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 text-xs text-green-600 font-bold">
+                    <span className="bg-green-50 px-2 py-1 rounded-full">✓ 10 MTK</span>
+                    <span className="bg-blue-50 px-2 py-1 rounded-full">✓ 10 B.Indo</span>
+                    <span className="bg-purple-50 px-2 py-1 rounded-full">✓ 10 IPA</span>
                   </div>
                 </div>
               </div>
@@ -59,14 +64,16 @@ export default function FreePage() {
         </div>
 
         <div className="mt-10 bg-white border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center shadow-sm">
-          <h4 className="font-black text-slate-800 text-lg">Mau 600 Soal Lengkap + Pembahasan Video?</h4>
-          <p className="text-sm text-slate-600 mt-1">Upgrade cuma <span className="font-black text-orange-600 text-lg">Rp 17RB</span> <span className="line-through text-xs text-slate-400">Rp 99RB</span> per kelas - HEMAT 82%!</p>
-          <Link href="/soal" className="inline-block mt-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-black px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-all">Lihat Paket 17RB → 600 Soal</Link>
-          <div className="mt-3 text-[11px] text-slate-400 font-medium">By MRH DigitalHub • Konsultan | Sertifikasi | DigitalHub • Bersinergi Bertransformasi Industri Modern</div>
+          <h4 className="font-black text-slate-800 text-lg">Mau 600 Soal Lengkap + Pembahasan?</h4>
+          <p className="text-sm text-slate-600 mt-1">Upgrade cuma <span className="font-black text-orange-600 text-lg">Rp 17RB</span> <span className="line-through text-xs">99RB</span> per kelas - HEMAT 82%!</p>
+          <Link href="/soal" className="inline-block mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-black px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-all">Lihat Paket 17RB → 600 Soal</Link>
         </div>
 
         <div className="mt-8 flex justify-center">
-          <img src="/logo-mrh-transparan.png" alt="MRH" className="h-12 object-contain opacity-80" onError={(e) => (e.currentTarget.style.display='none')} />
+          <div className="bg-[#FFF9D6] rounded-full px-5 py-2 flex items-center gap-3 border border-amber-100">
+            <img src="/mrh-logo.png" alt="MRH" className="h-8 object-contain" />
+            <span className="text-[10px] font-bold text-slate-600">© 2024 BIMBEL SUPER JUARA • MRH DigitalHub</span>
+          </div>
         </div>
       </div>
     </div>
