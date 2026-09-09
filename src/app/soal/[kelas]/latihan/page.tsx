@@ -32,15 +32,15 @@ export default function SoalFreeStylePremium() {
   const [jawab, setJawab] = useState('')
 
   useEffect(()=>{
-    async function load(){
-      setLoading(true)
-      // PREMIUM = is_free=false 600 soal, FREE = is_free=true 10 soal
-      const { data } = await supabase.from('soal').select('*').eq('kelas', kelasParam).eq('is_free', false).order('no_urut')
-      if(data) setSoalList(data)
-      setLoading(false)
-    }
-    load()
-  },[kelasParam])
+      const load = async () => {
+    setLoading(true)
+    // PREMIUM = is_free=false 600 soal, FREE = is_free=true 10 soal
+    const { data } = await supabase.from('soal').select('*').ilike('kelas', `%${kelasParam}%`).eq('is_free', false)
+    setSoalList(data || [])
+    setLoading(false)
+  }
+  load()
+},[kelasParam])
 
   useEffect(()=>{ setIdx(0); setShow(false); setJawab('') },[filter])
 
@@ -57,7 +57,7 @@ export default function SoalFreeStylePremium() {
       <div className="max-w-3xl mx-auto">
         {/* HEADER ala FREE */}
         <div className="flex justify-between items-center mb-4">
-          <Link href="/" className="text-sm text-slate-600 hover:text-slate-900">← Kembali</Link>
+          <Link href={`/soal/${kelasParam}`} className="text-sm text-slate-600 hover:text-slate-900">← Kembali</Link>
           <div className="bg-green-600 text-white px-4 py-1.5 rounded-full text-[11px] font-black">
             📚 {isPremium ? `PREMIUM ${kelasDisplay} - ${soalList.length} SOAL REAL dari DB` : `FREE ${kelasDisplay} - 10 SOAL REAL dari DB`}
           </div>
