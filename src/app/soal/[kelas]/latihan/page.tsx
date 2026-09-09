@@ -35,7 +35,7 @@ export default function LatihanPage(){
   useEffect(()=>{
     (async()=>{
       setLoading(true);
-      let q = supabase.from("soal").select("*").ilike("kelas",`%${kelasId}%`).limit(1000);
+      let q = supabase.from("soal").select("*").eq("kelas", kelasId).limit(1000);
       if(mapelParam) q = q.eq("mapel", mapelParam);
       const { data } = await q;
       setSoalList(data||[]);
