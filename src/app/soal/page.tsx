@@ -27,9 +27,9 @@ export default function DashboardKelasPage() {
   if (loading) return <div className="p-10 text-center font-black">Loading {kelasParam.toUpperCase()} - 600 Soal...</div>;
 
   const premium = soalList.filter(s => !s.is_free);
-  const free = soalList.filter(s => s.is_free);
-  const mapels = [...new Set(premium.map(s => s.mapel))].sort();
-  const totalPremium = premium.length;
+const free = soalList.filter(s => s.is_free);
+const mapels = [...new Set(premium.map(s => s.mapel))].sort();
+const totalPremium = premium.length;
 
   return (
     <div className="max-w-5xl mx-auto p-4 pb-10">
