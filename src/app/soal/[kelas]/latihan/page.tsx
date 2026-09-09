@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
+// WARNA PASTEL SESUAI KOTAK DASHBOARD - UNTUK DI DALAM KOTAK SOAL
 const warnaBg: any = {
   "Bahasa Indonesia": "bg-[#d4f8d4]",
   "IPAS": "bg-[#dbeafe]",
@@ -19,8 +20,9 @@ export default function LatihanPage(){
   const params = useParams();
   const searchParams = useSearchParams();
   const kelasParam = (params?.kelas as string) || "sd2";
-  const mapelParam = searchParams.get("mapel");
+  const mapelParam = searchParams.get("mapel") || "IPAS";
   const kelasId = `bsj-${kelasParam}`;
+
   const [soalList,setSoalList]=useState<any[]>([]);
   const [idx,setIdx]=useState(0);
   const [jawaban,setJawaban]=useState<Record<number,string>>({});
@@ -28,63 +30,102 @@ export default function LatihanPage(){
   const [selesai,setSelesai]=useState(false);
   const [loading,setLoading]=useState(true);
 
-  const bgPage = warnaBg[mapelParam||""] || "bg-[#fffaf0]";
+  // Background pastel untuk DI DALAM kotak
+  const bgKotak = warnaBg[mapelParam] || "bg-white";
 
-  useEffect(()=>{ (async()=>{
-    setLoading(true);
-    let q = supabase.from("soal").select("*").ilike("kelas",`%${kelasId}%`).limit(1000);
-    if(mapelParam) q = q.eq("mapel", mapelParam);
-    const {data}=await q;
-    setSoalList(data||[]); setLoading(false);
-  })()},[kelasId,mapelParam]);
+  useEffect(()=>{
+    async function load(){
+      setLoading(true);
+      let q = supabase.from("soal").select("*").ilike("kelas",`%${kelasId}%`).limit(1000);
+      if(mapelParam) q = q.eq("mapel", mapelParam);
+      const { data } = await q;
+      setSoalList(data||[]);
+      setLoading(false);
+    }
+    load();
+  },[kelasId, mapelParam]);
 
-  useEffect(()=>{setSelected(jawaban[idx]||"")},[idx,jawaban]);
+  useEffect(()=>{
+    setSelected(jawaban[idx]||"");
+  },[idx, jawaban]);
 
-  if(loading) return <div className={`min-h-screen flex items-center justify-center font-black ${bgPage}`}>Loading {mapelParam}...</div>;
+  if(loading) return <div className="min-h-screen bg-[#fffaf0] flex items-center justify-center font-black">Loading {mapelParam}...</div>;
 
   if(selesai){
-    let benar=0; soalList.forEach((s,i)=>{const k=(s.kunci_jawaban||s.kunci||"").toUpperCase(); if(jawaban[i]===k) benar++;});
-    const nilai=Math.round(benar/soalList.length*100);
+    let benar=0;
+    soalList.forEach((s,i)=>{
+      const k = (s.kunci_jawaban || s.kunci || s.jawaban_benar || "").toString().toUpperCase().trim();
+      if(jawaban[i]===k) benar++;
+    });
+    const nilai = soalList.length? Math.round(benar/soalList.length*100):0;
     return(
-      <div className={`min-h-screen p-4 ${bgPage}`}>
-        <div className="max-w-3xl mx-auto bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_black] p-6 text-center">
-          <h1 className="text-3xl font-black">🏆 Nilai: {nilai}</h1>
-          <p className="font-bold">{benar}/{soalList.length} benar • {mapelParam}</p>
-          <Link href={`/soal/${kelasParam}`} className="mt-4 inline-block bg-black text-white px-6 py-2 rounded-full font-black">← Dashboard</Link>
-        </div>
-        <div className="max-w-3xl mx-auto mt-4 space-y-2">
-          {soalList.map((s,i)=>{
-            const k=(s.kunci_jawaban||s.kunci||"").toUpperCase(); const u=jawaban[i]||"-";
-            return <div key={i} className="bg-white border-2 border-black rounded-xl p-4"><p className="font-bold text-sm">{i+1}. {s.pertanyaan} {u===k?'✅':'❌'}</p><p className="text-xs">Jawab: {u} | Kunci: {k}</p><p className="text-xs text-slate-600">Penjelasan: {s.penjelasan||"Sudah sesuai kunci."}</p></div>
-          })}
+      <div className="min-h-screen bg-[#fffaf0] p-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white border-2 border-black rounded-2xl shadow-[4px_4px_0px_black] p-6 text-center">
+            <h1 className="text-3xl font-black">🏆 Nilai: {nilai}</h1>
+            <p className="font-bold mt-2">{benar} benar dari {soalList.length} soal • {mapelParam}</p>
+            <div className="flex gap-2 justify-center mt-4">
+              <Link href={`/soal/${kelasParam}`} className="bg-white border-2 border-black px-6 py-2 rounded-full font-black">← Dashboard</Link>
+              <button onClick={()=>{setSelesai(false);setIdx(0);setJawaban({})}} className="bg-black text-white border-2 border-black px-6 py-2 rounded-full font-black">Ulangi</button>
+            </div>
+          </div>
+          <div className="mt-6 space-y-3">
+            {soalList.map((s,i)=>{
+              const k = (s.kunci_jawaban || s.kunci || "").toString().toUpperCase();
+              const u = jawaban[i]||"-";
+              const ok = u===k;
+              return(
+                <div key={i} className={`border-2 border-black rounded-xl p-4 ${ok?'bg-green-50':'bg-red-50'}`}>
+                  <p className="font-bold text-sm">{i+1}. {s.pertanyaan||s.soal} {ok?'✅':'❌'}</p>
+                  <p className="text-xs mt-1">Jawabanmu: <b>{u}</b> | Kunci: <b className="text-green-700">{k}</b></p>
+                  <p className="text-xs mt-1 text-slate-600"><b>Penjelasan:</b> {s.penjelasan||s.pembahasan||"Kunci jawaban sudah sesuai."}</p>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     )
   }
 
-  const s=soalList[idx]; if(!s) return <div className={`p-10 text-center ${bgPage}`}><Link href={`/soal/${kelasParam}`} className="bg-black text-white px-6 py-2 rounded-full font-black">← Dashboard</Link></div>;
+  const s = soalList[idx];
+  if(!s) return <div className="min-h-screen bg-[#fffaf0] p-10 text-center"><Link href={`/soal/${kelasParam}`} className="bg-black text-white px-6 py-2 rounded-full font-black">← Kembali Dashboard</Link></div>;
 
   return(
-    <div className={`min-h-screen p-4 ${bgPage}`}>
+    <div className="min-h-screen bg-[#fffaf0] p-4">
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <Link href={`/soal/${kelasParam}`} className="bg-white border-2 border-black px-4 py-2 rounded-full font-black text-sm shadow-[3px_3px_0px_black]">← Dashboard {kelasParam.toUpperCase()}</Link>
           <div className="bg-black text-white px-4 py-1.5 rounded-full text- font-black border-2 border-black">{mapelParam} • {idx+1}/{soalList.length}</div>
         </div>
-        <div className="bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_black] p-5">
-          <p className="text- font-bold text-slate-500">SOAL {idx+1}/{soalList.length} • {s.mapel}</p>
+
+        {/* INI KOTAK SOAL YANG WARNA PASTEL DI DALAM - LUAR TETAP POLOS */}
+        <div className={`rounded-2xl border-2 border-black shadow-[4px_4px_0px_black] p-5 ${bgKotak}`}>
+          <p className="text- font-bold text-slate-500">SOAL {idx+1}/{soalList.length} • {s.mapel} • #{String(s.id).slice(0,8)}</p>
           <h2 className="font-black text- mt-2">{idx+1}. {s.pertanyaan||s.soal}</h2>
+
           <div className="mt-4 space-y-2">
             {['A','B','C','D'].map(op=>{
-              const val=s[`opsi_${op.toLowerCase()}`]||s[op]||""; const sel=selected===op;
-              return <button key={op} onClick={()=>{setSelected(op); setJawaban(p=>({...p,[idx]:op}))}} className={`w-full text-left border-2 rounded-xl p-3 font-bold ${sel?'bg-black text-white border-black':'bg-white border-slate-200 hover:border-black'}`}>{op}. {val}</button>
+              const val = s[`opsi_${op.toLowerCase()}`] || s[op] || "";
+              const isSelected = selected===op;
+              return(
+                <button key={op} onClick={()=>{ setSelected(op); setJawaban(prev=>({...prev,[idx]:op})); }}
+                  className={`w-full text-left border-2 rounded-xl p-3 font-bold transition ${isSelected?'bg-black text-white border-black':'bg-white border-slate-200 hover:border-black'}`}>
+                  {op}. {val}
+                </button>
+              )
             })}
           </div>
+
           <div className="mt-5 flex justify-between">
             <button onClick={()=>setIdx(Math.max(0,idx-1))} className="px-5 py-2 bg-white border-2 border-black rounded-full font-black text-sm">← Prev</button>
-            <button onClick={()=> idx===soalList.length-1? setSelesai(true):setIdx(idx+1)} disabled={!selected} className={`px-6 py-2 border-2 border-black rounded-full font-black text-sm ${!selected?'bg-slate-200':'bg-black text-white'}`}>{idx===soalList.length-1?'Selesai 🏆':'Next →'}</button>
+            <button onClick={()=>{ if(idx===soalList.length-1) setSelesai(true); else setIdx(idx+1); }} disabled={!selected} className={`px-6 py-2 border-2 border-black rounded-full font-black text-sm ${!selected?'bg-slate-200 text-slate-400':'bg-black text-white'}`}>
+              {idx===soalList.length-1?'Selesai & Lihat Nilai 🏆':'Next →'}
+            </button>
           </div>
         </div>
+
+        <p className="text-center mt-4"><Link href={`/soal/${kelasParam}`} className="text- font-black underline">Ganti Mapel di Dashboard</Link></p>
       </div>
     </div>
   )
