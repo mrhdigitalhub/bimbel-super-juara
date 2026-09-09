@@ -9,17 +9,17 @@ const META: any = {
   "Bahasa Indonesia": { icon:"📖", bg:"#E8F5E9", badge:"#16a34a", short:"Bahasa Indonesia" },
   "IPAS": { icon:"🔬", bg:"#E3F2FD", badge:"#2563eb", short:"IPAS" },
   "Matematika": { icon:"🔢", bg:"#FFF9C4", badge:"#eab308", short:"Matematika" },
-  "Pendidikan Agama & Budi Pekerti": { icon:"🕌", bg:"#FCE4EC", badge:"#ec4899", short:"PAI & Budi Pekerti" },
-  "Pendidikan Pancasila": { icon:"🇮🇩", bg:"#FFF3E0", badge:"#f97316", short:"Pancasila" },
+  "Pendidikan Agama & Budi Pekerti": { icon:"🕌", bg:"#FCE4EC", badge:"#ec4899", short:"Pendidikan Agama & Budi Pekerti" },
+  "Pendidikan Pancasila": { icon:"🇮🇩", bg:"#FFF3E0", badge:"#f97316", short:"Pendidikan Pancasila" },
 };
 
 export default function DashboardKelasPage(){
   const params = useParams();
   const kelasParam = (params?.kelas as string) || "sd1";
-  const kelasId = `bsj-${kelasParam}`;
+  const kelasId = kelasParam.startsWith("bsj-") ? kelasParam : `bsj-${kelasParam}`;
   const [list,setList]=useState<any[]>([]);
   const [load,setLoad]=useState(true);
-  useEffect(()=>{ (async()=>{ const {data}=await supabase.from("soal").select("mapel,is_free").ilike("kelas",`%${kelasId}%`).limit(1000); setList(data||[]); setLoad(false); })() },[kelasId]);
+  useEffect(()=>{ (async()=>{ const {data}=await supabase.from("soal").select("mapel,is_free").eq("kelas",`%${kelasId}%`).limit(1000); setList(data||[]); setLoad(false); })() },[kelasId]);
   if(load) return <div className="p-10 text-center font-black">Loading {kelasParam.toUpperCase()}...</div>;
   const premium=list.filter((s:any)=>!s.is_free);
 

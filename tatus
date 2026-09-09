@@ -1,0 +1,179 @@
+[33mcommit d11a582be7ced13fce6524e63f4bbc0947d91412[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 15:19:12 2026 +0700
+
+    update
+
+[33mcommit 4bb1637fb067be107f090bc9087231a09b56429b[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 14:25:36 2026 +0700
+
+    update
+
+[33mcommit f549beef769ee91d2af3bceaf67095cdcebe1282[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 13:57:17 2026 +0700
+
+    update
+
+[33mcommit 29b34c31cfba70b02181e69aae1ca1aa092123ec[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 13:51:27 2026 +0700
+
+    update
+
+[33mcommit 4175e2bd37e33d26cbadda71d1f3108be3ddbdfe[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 13:41:48 2026 +0700
+
+    update
+
+[33mcommit cd195610afb3c3993569946aef0d86aef33d4fac[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 13:33:42 2026 +0700
+
+    update
+
+[33mcommit e02085e5e1f47ad8a78553e9e1e328730a51ffbc[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 13:23:04 2026 +0700
+
+    fix filter mapel
+
+[33mcommit 96e984fba46f63a91521032a5d5c6be934649059[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 12:30:31 2026 +0700
+
+    feat: dashboard pastel icon mapel klik langsung latihan, hapus tombol 600
+
+[33mcommit 4d291b2c90b8793c2f0e7217b0481e7d3a4fa34d[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 12:11:20 2026 +0700
+
+    fix: soal page daftar kelas & dashboard kelas anti toUpperCase error
+
+[33mcommit 0736f4d62735896ea7816a0a64c679758ef0041b[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 11:03:20 2026 +0700
+
+    fix: soallist L besar juara
+
+[33mcommit 3afd0b50c96fdc0cc5a7f8d7f2624119f95004a7[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 10:58:01 2026 +0700
+
+    fix: typo x!s.is_free juara
+
+[33mcommit 6ac51ffedf22de59f9d8aea902880c7627d180f9[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 10:51:43 2026 +0700
+
+    feat: 5 mapel 120 juara final
+
+[33mcommit 033ded2797663c95eed942ac4f5bbffbb322e916[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Wed Sep 9 10:05:14 2026 +0700
+
+    fix: 600 soal ilike bsj-sdX + kembali ke /soal/[kelas] + hapus client double
+
+[33mcommit f904e3df2e5eb762308cb46f7c9a9eeaa0d52fae[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Tue Sep 8 10:46:35 2026 +0700
+
+    feat: header MRH logo public + footer CTA WA 6281770220059 + back button
+
+[33mcommit 598651bb3a3ff70cdfba0931aefc3e62ae659620[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Tue Sep 8 10:17:16 2026 +0700
+
+    feat: free [kelas_id] page fetch soal_tka is_free=true SD1-SD6 175 soal
+
+[33mcommit 618664db0d06ca68886ad334722c2f46fa681ac4[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Tue Sep 8 07:57:43 2026 +0700
+
+    fix: clean duplicate, header lengkap, box tosca
+
+[33mcommit 35460f53fb7b57794cb8ae7d28169d22359bda05[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Tue Sep 8 07:54:18 2026 +0700
+
+    fix: header lengkap judul tagline, 6 kotak sama live tanpa angka, box 600 soal tosca
+
+[33mcommit f28f5af7c17cc12c381c0d7813795a6b32edd2a2[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Tue Sep 8 07:23:55 2026 +0700
+
+    fix: header logo utuh, hapus kotak hijau, kembalikan tombol Lihat Paket
+
+[33mcommit 51061be528af40cee400f8f9bfd9e4762150728c[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 19:15:13 2026 +0700
+
+    fix: footer 2026, hapus admin, warna mapel, toska, wa admin
+
+[33mcommit a04b4788c365e060e03333a382163136b266c642[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 19:02:14 2026 +0700
+
+    fix: warna mapel navy pink orange
+
+[33mcommit 780897db5484037030a6ee7a46799565c8180aa1[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 17:33:50 2026 +0700
+
+    fix: logo mrh pakai mrh-logo.png final
+
+[33mcommit c8f4590ad47607095db33244db8f150c08243956[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 17:24:18 2026 +0700
+
+    fix: logo MRH file name
+
+[33mcommit 429f03e99601055a7321cdf3c83668484c763ec9[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 17:14:23 2026 +0700
+
+    fix: dashboard free 6 kelas + soal free clickable + logo MRH
+
+[33mcommit a5eae88c2ee8e1e17f44674aa05148d00793b7ab[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 15:20:49 2026 +0700
+
+    fix: hapus admin/app dobel dan fix suspense hasil
+
+[33mcommit abf2542c1ce8f76d5c70953e0db84a560373dbe3[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 14:36:54 2026 +0700
+
+    trigger vercel deploy latest
+
+[33mcommit 5f378103fc200e543e67c15517d2c3e1415aa37d[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 14:08:54 2026 +0700
+
+    fix: hasil suspense Next 16
+
+[33mcommit 6a04d273a7573d1b1e68350f82bbf8eeef368b2e[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 13:31:30 2026 +0700
+
+    fix: all pages dynamic - juara ready
+
+[33mcommit 1928fb0f21af4486561b8e40a9a3406bedc74b71[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 11:35:48 2026 +0700
+
+    fix: anti error build supabase
+
+[33mcommit 795acb56f95097eb8f14ae78d3458497eedd2847[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Mon Sep 7 11:10:29 2026 +0700
+
+    deploy mrh-digitalhub.vercel.app
+
+[33mcommit 6f2d41aa11fd21881d54b7ea83f9ec067281327b[m
+Author: Rismawan Maulana Sidiq <rismawanm170@gmail.com>
+Date:   Thu Sep 3 14:47:41 2026 +0700
+
+    Initial commit from Create Next App
