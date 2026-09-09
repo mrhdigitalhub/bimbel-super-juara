@@ -1,132 +1,144 @@
+// src/app/soal/[kelas]/latihan/page.tsx - V3 MIXED SUPPORT PG + ISIAN + ESSAY + BENAR SALAH
 "use client";
-export const dynamic = 'force-dynamic';
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
-const warnaBg: any = {
-  "Bahasa Indonesia": "bg-[#d4f8d4]",
-  "IPAS": "bg-[#dbeafe]",
-  "Matematika": "bg-[#fef9c3]",
-  "Pendidikan Agama & Budi Pekerti": "bg-[#fce7f3]",
-  "PAI & Budi Pekerti": "bg-[#fce7f3]",
-  "Pendidikan Pancasila": "bg-[#ffedd5]",
-  "Pancasila": "bg-[#ffedd5]",
+type Soal = {
+  id: number;
+  kelas: string;
+  mapel: string;
+  no_urut: number;
+  tipe_soal: string;
+  pertanyaan: string;
+  opsi_a?: string;
+  opsi_b?: string;
+  opsi_c?: string;
+  opsi_d?: string;
+  jawaban?: string;
+  jawaban_isian?: string;
+  kunci_essay?: string;
+  pembahasan: string;
+  is_free: boolean;
 };
 
-const BATCH = 20;
-
-function cleanText(t: string) {
-  if (!t) return "";
-  return t
-   .replace(/Pertanyaan ke-\d+\s*/gi, "")
-   .replace(/\[BSJ-[^\]]+\]:?\s*/gi, "")
-   .replace(/\[BSJ-[^\]]+\]/g, "")
-   .replace(/\(Skenario HOTS[^)]+\)/gi, "")
-   .replace(/\s*#\d+\s*$/g, "")
-   .replace(/^\d+\.\s*/, "")
-   .trim();
-}
-
-export default function LatihanPage(){
+export default function LatihanPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const kelasParam = (params?.kelas as string) || "sd2";
-  const mapelParam = searchParams.get("mapel") || "IPAS";
-  // FIX UTAMA: jangan jadi bsj-bsj-sd2
-  const kelasId = kelasParam.startsWith("bsj-")? kelasParam : kelasParam;
+  const rawKelas = params.kelas as string;
+  const mapel = searchParams.get('mapel') || 'IPAS';
 
-  const [soalList,setSoalList]=useState<any[]>([]);
-  const [idx,setIdx]=useState(0);
-  const [jawaban,setJawaban]=useState<Record<number,string>>({});
-  const [selected,setSelected]=useState("");
-  const [mode,setMode]=useState<"soal"|"batch"|"final">("soal");
-  const [loading,setLoading]=useState(true);
+  const kelasId = rawKelas?.startsWith("bsj-") ? rawKelas : `bsj-${rawKelas}`;
 
-  const bgKotak = warnaBg[mapelParam] || "bg-white";
+  const [soal, setSoal] = useState<Soal[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [current, setCurrent] = useState(0);
+  const [jawabanUser, setJawabanUser] = useState<Record<string, string>>({});
+  const [showHasil, setShowHasil] = useState(false);
 
-  useEffect(()=>{
-    (async()=>{
+  useEffect(() => {
+    async function load() {
       setLoading(true);
-      let q = supabase.from("soal").select("*").eq("kelas", kelasId).limit(1000);
-      if(mapelParam) q = q.eq("mapel", mapelParam);
-      const { data } = await q;
-      setSoalList(data||[]);
+      const { data, error } = await supabase
+        .from('soal')
+        .select('*')
+        .eq('kelas', kelasId)
+        .eq('mapel', mapel)
+        .order('no_urut', { ascending: true });
+
+      if (error) console.error(error);
+      else setSoal((data as Soal[]) || []);
       setLoading(false);
-    })();
-  },[kelasId,mapelParam]);
-
-  useEffect(()=>{ setSelected(jawaban[idx]||""); },[idx,jawaban]);
-
-  const getKunci = (s:any)=> (s.kunci_jawaban||s.kunci||s.jawaban_benar||"").toString().toUpperCase().trim();
-
-  const hitungBatch = (start:number,end:number)=>{
-    let benar=0;
-    for(let i=start;i<end;i++){
-      if(jawaban[i] && jawaban[i]===getKunci(soalList[i])) benar++;
     }
-    return benar;
-  }
+    load();
+  }, [kelasId, mapel]);
 
-  if(loading) return <div className="p-10 text-center">Loading {mapelParam} {kelasId}...</div>;
-  if(!soalList.length) return (
-    <div className="p-10 text-center">
-      <Link href={`/soal/${kelasParam}`} className="bg-black text-white px-6 py-2 rounded-full">← Dashboard</Link>
-      <p className="mt-6">Soal tidak ditemukan untuk kelas={kelasId} mapel={mapelParam}. Cek Supabase!</p>
-    </div>
-  );
+  if (loading) return <div className="p-10 text-center">Loading {kelasId} - {mapel}...</div>;
+  if (soal.length === 0) return <div className="p-10 text-center">Belum ada soal untuk {kelasId} - {mapel}</div>;
 
-  const s = soalList[idx];
-  const batchStart = Math.floor(idx/BATCH)*BATCH;
-  const batchEnd = Math.min(batchStart+BATCH, soalList.length);
-  const sisaMenujuPembahasan = batchEnd - (idx+1);
+  const s = soal[current];
+  const isPG = s.tipe_soal === 'pilihan_ganda';
+  const isIsian = s.tipe_soal === 'isian';
+  const isEssay = s.tipe_soal === 'essay';
+  const isBenarSalah = s.tipe_soal === 'benar_salah';
 
   return (
-    <div className="min-h-screen bg-[#fefce8] p-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <Link href={`/soal/${kelasParam}`} className="bg-black text-white px-4 py-1.5 rounded-full text-sm font-bold">← Dashboard {kelasParam.toUpperCase()}</Link>
-          <div className="bg-black text-white px-4 py-1.5 rounded-full text-sm font-bold">{mapelParam} • {idx+1}/{soalList.length} • Batch {Math.floor(idx/BATCH)+1}/{Math.ceil(soalList.length/BATCH)}</div>
-        </div>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-xl font-bold mb-2">{kelasId} - {mapel} ({soal.length} Soal) V3 Mixed</h1>
+      <div className="flex gap-2 mb-4 text-sm">
+        <span className="px-2 py-1 bg-blue-100 rounded">Soal {current + 1}/{soal.length}</span>
+        <span className="px-2 py-1 bg-purple-100 rounded">{s.tipe_soal}</span>
+        <span className="px-2 py-1 bg-green-100 rounded">{s.is_free ? 'GRATIS' : 'PREMIUM'}</span>
+      </div>
 
-        {mode==="soal" && (
-          <div className={`border-2 border-black rounded-2xl p-5 ${bgKotak} shadow-[4px_4px_0px_0px_black]`}>
-            <p className="text-xs font-bold mb-2">SOAL {idx+1}/{soalList.length} • Sisa {sisaMenujuPembahasan} lagi menuju pembahasan</p>
-            <h2 className="font-bold mb-4">{idx+1}. {cleanText(s.pertanyaan)}</h2>
+      <div className="border rounded-xl p-6 shadow bg-white">
+        <p className="text-lg mb-6 leading-relaxed">{s.pertanyaan}</p>
 
-            {["A","B","C","D"].map((k)=>{
-              const opsi = cleanText(s[`opsi_${k.toLowerCase()}`]||"");
-              const isSelected = selected===k;
-              return (
-                <button key={k} onClick={()=>{setSelected(k); setJawaban({...jawaban,[idx]:k})}}
-                  className={`w-full text-left border-2 border-black rounded-xl p-3 mb-2 bg-white ${isSelected?"bg-yellow-200":""}`}>
-                  <b>{k}.</b> {opsi}
-                </button>
-              )
-            })}
+        {isPG && (
+          <div className="grid gap-3">
+            {[
+              {k:'A', v:s.opsi_a},
+              {k:'B', v:s.opsi_b},
+              {k:'C', v:s.opsi_c},
+              {k:'D', v:s.opsi_d},
+            ].map((opt) => (
+              <button
+                key={opt.k}
+                onClick={() => setJawabanUser({...jawabanUser, [String(s.no_urut)]: opt.k})}
+                className={`text-left border p-3 rounded-lg hover:bg-blue-50 ${jawabanUser[String(s.no_urut)]===opt.k ? 'bg-blue-100 border-blue-500 font-bold' : ''}`}
+              >
+                <span className="font-bold mr-2">{opt.k}.</span> {opt.v}
+              </button>
+            ))}
+          </div>
+        )}
 
-            <div className="flex justify-between mt-4">
-              <button disabled={idx===0} onClick={()=>setIdx(idx-1)} className="border-2 border-black rounded-full px-4 py-1 bg-white disabled:opacity-30">← Prev</button>
-              <button onClick={()=>{
-                if(idx+1===batchEnd) setMode("batch");
-                else setIdx(idx+1);
-              }} className="border-2 border-black rounded-full px-4 py-1 bg-white">Next →</button>
+        {isIsian && (
+          <div>
+            <input
+              type="text"
+              placeholder="Ketik jawaban singkat 1-3 kata..."
+              value={jawabanUser[String(s.no_urut)] || ''}
+              onChange={(e) => setJawabanUser({...jawabanUser, [String(s.no_urut)]: e.target.value})}
+              className="border-2 p-3 w-full rounded-lg focus:border-blue-500 outline-none"
+            />
+            {showHasil && (
+              <div className="mt-3 p-3 bg-green-50 rounded">Kunci: <b>{s.jawaban_isian}</b></div>
+            )}
+          </div>
+        )}
+
+        {isBenarSalah && (
+          <div>
+            <div className="flex gap-3 mb-3">
+              <button onClick={() => setJawabanUser({...jawabanUser, [String(s.no_urut)]: 'Benar'})} className={`px-6 py-2 rounded-full border ${jawabanUser[String(s.no_urut)]==='Benar'?'bg-green-500 text-white':''}`}>Benar</button>
+              <button onClick={() => setJawabanUser({...jawabanUser, [String(s.no_urut)]: 'Salah'})} className={`px-6 py-2 rounded-full border ${jawabanUser[String(s.no_urut)]==='Salah'?'bg-red-500 text-white':''}`}>Salah</button>
             </div>
+            <textarea placeholder="Tulis alasanmu..." value={jawabanUser[`${s.no_urut}_alasan`] || ''} onChange={(e)=>setJawabanUser({...jawabanUser, [`${s.no_urut}_alasan`]: e.target.value})} className="border p-3 w-full rounded-lg h-20" />
+            {showHasil && <div className="mt-3 p-3 bg-yellow-50 rounded">Kunci: {s.jawaban_isian} <br/> Alasan: {s.kunci_essay}</div>}
           </div>
         )}
 
-        {mode==="batch" && (
-          <div className="border-2 border-black rounded-2xl p-6 bg-white text-center">
-            <h2 className="text-xl font-bold">Batch {Math.floor(idx/BATCH)+1} Selesai!</h2>
-            <p className="my-2">Benar {hitungBatch(batchStart,batchEnd)} dari {batchEnd-batchStart} soal</p>
-            <button onClick={()=>{setMode("soal"); setIdx(batchEnd)}} className="bg-black text-white px-6 py-2 rounded-full mr-2">Lanjut Batch Berikutnya</button>
-            <button onClick={()=>setMode("soal")} className="border-2 border-black px-6 py-2 rounded-full">Ulangi Batch</button>
+        {isEssay && (
+          <div>
+            <textarea placeholder="Jelaskan jawabanmu dengan cerita..." value={jawabanUser[String(s.no_urut)] || ''} onChange={(e)=>setJawabanUser({...jawabanUser, [String(s.no_urut)]: e.target.value})} className="border-2 p-3 w-full rounded-lg h-32 focus:border-blue-500 outline-none" />
+            {showHasil && <div className="mt-3 p-3 bg-blue-50 rounded"><b>Poin Kunci:</b><br/>{s.kunci_essay}</div>}
           </div>
         )}
 
-        <p className="text-center text-xs mt-4 text-gray-600">Pembahasan muncul setiap {BATCH} soal • Total {soalList.length} soal {mapelParam}</p>
+        {showHasil && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <p className="font-bold">Pembahasan:</p>
+            <p>{s.pembahasan}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-between mt-6">
+        <button disabled={current===0} onClick={()=>{setCurrent(current-1); setShowHasil(false)}} className="px-4 py-2 border rounded disabled:opacity-30">← Sebelumnya</button>
+        <button onClick={()=>setShowHasil(!showHasil)} className="px-4 py-2 bg-yellow-400 rounded font-bold">{showHasil ? 'Sembunyikan' : 'Lihat Kunci'}</button>
+        <button disabled={current===soal.length-1} onClick={()=>{setCurrent(current+1); setShowHasil(false)}} className="px-4 py-2 border rounded disabled:opacity-30">Selanjutnya →</button>
       </div>
     </div>
-  )
+  );
 }
