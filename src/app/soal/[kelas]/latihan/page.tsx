@@ -225,6 +225,7 @@ export default function LatihanPage() {
           {isEndOfBlock && !isLastSoal && <button onClick={()=>{const sc=hitungScore(currentBlockIndex*20, current); setShowBlockScore(true);}} className="px-4 py-2 bg-orange-500 text-white rounded font-bold">Nilai Blok {currentBlockIndex+1}</button>}
           {isLastSoal && <button onClick={()=>setShowFinalScore(true)} className="px-4 py-2 bg-blue-600 text-white rounded font-bold">Lihat Total Nilai 🏆</button>}
         </div>
+
         <button disabled={current===soal.length-1} onClick={()=>{if((current+1)%20===0){setShowBlockScore(true);} setCurrent(current+1); setShowHasil(false);}} className="px-4 py-2 border rounded disabled:opacity-30">Selanjutnya →</button>
       </div>
 
