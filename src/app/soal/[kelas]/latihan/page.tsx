@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 
 // STEP 5 - V4 30 SOAL PER BAB: 15 PG HOTS + 8 SINGKAT + 7 URAIAN
 export default function LatihanV4() {
