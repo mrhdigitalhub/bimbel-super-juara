@@ -11,28 +11,30 @@ export async function GET(req: Request) {
     return NextResponse.json({ soal: [] })
   }
 
+  const babNum = Number(bab)
+
   const { data, error } = await supabase
     .from('soal')
     .select('*')
     .eq('kelas', kelas)
     .eq('mapel', mapel)
-    .eq('bab', Number(bab))
-    .order('nomor', { ascending: true })
+    .eq('bab_ke', babNum)
+    .order('no_urut', { ascending: true })
     .limit(30)
 
   if (error) {
-    console.error('Supabase error:', error)
     return NextResponse.json({ soal: [], error: error.message })
   }
 
-  // Format Supabase -> format latihan/page.tsx
   const soal = (data || []).map((row: any) => ({
-    no: row.nomor,
-    tipe: row.tipe || 'PG',
+    no: row.no_urut,
+    tipe: row.tipe_soal || 'PG',
     tanya: row.pertanyaan,
     opsi: [row.opsi_a, row.opsi_b, row.opsi_c, row.opsi_d].filter(Boolean),
-    kunci: row.jawaban_benar,
-    pembahasan: row.pembahasan || ''
+    kunci: row.jawaban || row.jawaban_isian || row.kunci_essay,
+    pembahasan: row.pembahasan || '',
+    nama_bab: row.nama_bab,
+    gambar: row.petunjuk_gambar
   }))
 
   return NextResponse.json({ soal })
