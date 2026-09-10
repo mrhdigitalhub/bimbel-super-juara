@@ -1,26 +1,38 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
 
+const MAPEL_MAP: Record<string, string[]> = {
+  'PAI': ['Pendidikan Agama & Budi Pekerti', 'PAI & Budi Pekerti', 'PAI'],
+  'BINDO': ['Bahasa Indonesia'],
+  'Bahasa Indonesia': ['Bahasa Indonesia'],
+  'MTK': ['Matematika'],
+  'Matematika': ['Matematika'],
+  'PPKN': ['Pendidikan Pancasila'],
+  'Pendidikan Pancasila': ['Pendidikan Pancasila'],
+  'IPAS': ['IPAS'],
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const kelas = searchParams.get('kelas')
-  const mapel = searchParams.get('mapel')
+  let mapel = searchParams.get('mapel')
   const bab = searchParams.get('bab')
 
-  if (!kelas || !mapel || !bab) {
+  if (!kelas ||!mapel ||!bab) {
     return NextResponse.json({ soal: [] })
   }
 
   const babNum = Number(bab)
+  const mapelList = MAPEL_MAP[mapel] || [mapel]
 
   const { data, error } = await supabase
-    .from('soal')
-    .select('*')
-    .eq('kelas', kelas)
-    .eq('mapel', mapel)
-    .eq('bab_ke', babNum)
-    .order('no_urut', { ascending: true })
-    .limit(30)
+   .from('soal')
+   .select('*')
+   .eq('kelas', kelas)
+   .in('mapel', mapelList)
+   .eq('bab_ke', babNum)
+   .order('no_urut', { ascending: true })
+   .limit(30)
 
   if (error) {
     return NextResponse.json({ soal: [], error: error.message })
@@ -34,7 +46,6 @@ export async function GET(req: Request) {
     kunci: row.jawaban || row.jawaban_isian || row.kunci_essay,
     pembahasan: row.pembahasan || '',
     nama_bab: row.nama_bab,
-    gambar: row.petunjuk_gambar
   }))
 
   return NextResponse.json({ soal })
