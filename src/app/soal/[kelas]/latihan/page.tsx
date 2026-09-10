@@ -107,10 +107,10 @@ export default function LatihanPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow">
-        <h1 className="font-bold text-sm md:text-base">
+        <h1 className="font-bold text-sm md:text-base" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
           {kelas.toUpperCase()} - {mapelParam} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL (Supabase)
         </h1>
         <div className="flex gap-2">
@@ -132,8 +132,8 @@ export default function LatihanPage() {
           ].filter((o) => o.text && o.text.trim() !== "");
 
           return (
-            <div key={s.id || idx} className="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm">
-              <div className="font-bold text-sm mb-3">
+            <div key={s.id || idx} className="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
+              <div className="font-bold text-sm mb-3" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                 <span className="bg-orange-400 text-white px-2 py-0.5 rounded text-xs mr-2">{s.no_urut || idx + 1}</span>
                 [{s.tipe_soal || "pg"}] {s.pertanyaan}
               </div>
@@ -146,6 +146,7 @@ export default function LatihanPage() {
                       className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer hover:bg-blue-50 ${
                         jawabanUser[s.no_urut] === opsi.key ? "bg-blue-100 border-blue-400" : "border-gray-300"
                       }`}
+                      style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
                     >
                       <input
                         type="radio"
@@ -155,7 +156,7 @@ export default function LatihanPage() {
                         onChange={() => handleJawab(s.no_urut, opsi.key)}
                         className="accent-blue-600"
                       />
-                      <span className="text-sm">
+                      <span className="text-sm" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                         {opsi.key}. {opsi.text}
                       </span>
                     </label>
@@ -166,13 +167,14 @@ export default function LatihanPage() {
                   <textarea
                     placeholder="Tulis jawaban..."
                     className="w-full border rounded-lg p-3 text-sm min-h-[80px]"
+                    style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
                     onChange={(e) => handleJawab(s.no_urut, e.target.value)}
                   />
                 </div>
               )}
 
               {s.pembahasan && jawabanUser[s.no_urut] && (
-                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
                   <b>Pembahasan:</b> {s.pembahasan} <br />
                   <b>Kunci:</b> {s.jawaban}
                 </div>
@@ -183,7 +185,7 @@ export default function LatihanPage() {
       </div>
 
       {soal.length === 0 && (
-        <div className="text-center p-8 bg-white rounded-xl">
+        <div className="text-center p-8 bg-white rounded-xl" style={{ fontFamily: "Arial, Helvetica, sans-serif" }}>
           Soal tidak ditemukan untuk {kelas} {mapelParam} BAB {babParam}. Cek Supabase!
         </div>
       )}
