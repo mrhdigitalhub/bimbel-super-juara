@@ -1,48 +1,22 @@
-// src/app/soal/[kelas]/latihan/page.tsx - FIX 100% JUARA
+export const dynamic = 'force-dynamic';
 "use client";
-import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { Suspense } from "react";
+import Link from "next/link";
 
-export default function LatihanPage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const rawKelas = params.kelas as string;
-  const mapel = searchParams.get('mapel') || 'IPAS';
-
-  // FIX ANTI bsj-bsj-sd2
-  const kelasId = rawKelas?.startsWith("bsj-")? rawKelas : `bsj-${rawKelas}`;
-
-  const [soal, setSoal] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const { data, error } = await supabase
-       .from('soal')
-       .select('*')
-       .eq('kelas', kelasId)
-       .eq('mapel', mapel)
-       .order('no_urut', { ascending: true });
-
-      if (error) {
-        console.error(error);
-      } else {
-        setSoal(data || []);
-      }
-      setLoading(false);
-    }
-    load();
-  }, [kelasId, mapel]);
-
-  if (loading) return <div className="p-10">Loading {kelasId} - {mapel}...</div>;
-
+function SoalContent(){
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold">{kelasId} - {mapel} ({soal.length} Soal)</h1>
-      {/* render soal kamu selanjutnya */}
-      <pre className="mt-4 text-xs">{JSON.stringify(soal.slice(0,1), null, 2)}</pre>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Pilih Kelas - Bimbel Super Juara</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {["bsj-sd1","bsj-sd2","bsj-sd3","bsj-sd4","bsj-sd5","bsj-sd6"].map(k=>(
+          <Link key={k} href={`/soal/${k}/latihan?mapel=Matematika&bab=1`} className="border-2 border-orange-300 bg-orange-50 p-6 rounded-xl text-center font-bold uppercase hover:bg-orange-100">
+            {k.replace('bsj-','').toUpperCase()}<br/><span className="text-xs font-normal">30 Soal / Bab</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
+}
+export default function Page(){
+  return <Suspense fallback={<div className="p-10 text-center">Loading...</div>}><SoalContent/></Suspense>;
 }
