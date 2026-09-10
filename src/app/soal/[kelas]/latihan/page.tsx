@@ -1,50 +1,192 @@
-// @ts-nocheck
 "use client";
-import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-const JUDUL_BAB_ALL = {"bsj-sd1": {"PAI": {"1": "Rukun Iman", "2": "Bersuci & Wudhu", "3": "Mengenal Huruf Hijaiyah", "4": "Doa Sehari-hari", "5": "Kisah Nabi", "6": "Akhlak Terpuji"}, "BINDO": {"1": "Bunyi dan Huruf", "2": "Sapa dan Salam", "3": "Cerita Bergambar", "4": "Kosakata Baru", "5": "Kalimat Sederhana", "6": "Membaca Nyaring"}, "MTK": {"1": "Bilangan 1-10", "2": "Penjumlahan & Pengurangan", "3": "Bangun Datar", "4": "Pengukuran Panjang", "5": "Waktu & Jam", "6": "Soal Cerita"}, "PPKN": {"1": "Aturan di Rumah", "2": "Aturan di Sekolah", "3": "Simbol Pancasila", "4": "Hidup Rukun", "5": "Toleransi", "6": "Gotong Royong"}, "IPAS": {"1": "Bagian Tubuh", "2": "Panca Indera", "3": "Makhluk Hidup", "4": "Benda di Sekitar", "5": "Cuaca", "6": "Lingkungan Bersih"}}, "bsj-sd2": {"PAI": {"1": "Asmaul Husna", "2": "Shalat Wajib", "3": "Hijaiyah Sambung", "4": "Adab Sehari-hari", "5": "Kisah Nabi Nuh & Ibrahim", "6": "Akhlak Jujur & Disiplin"}, "BINDO": {"1": "Huruf Vokal Konsonan", "2": "Perkenalan Diri", "3": "Dongeng Fabel", "4": "Kata Sifat", "5": "Kalimat Tanya", "6": "Menulis Cerita Pendek"}, "MTK": {"1": "Bilangan 11-100", "2": "Penjumlahan Bersusun", "3": "Pengurangan Bersusun", "4": "Perkalian Dasar", "5": "Pembagian Dasar", "6": "Bangun Ruang Sederhana"}, "PPKN": {"1": "Sila 1-2 Pancasila", "2": "Hak & Kewajiban", "3": "Hidup Tertib", "4": "Kerja Sama", "5": "Musyawarah", "6": "Cinta Lingkungan"}, "IPAS": {"1": "Anggota Keluarga", "2": "Pertumbuhan Manusia", "3": "Sumber Energi", "4": "Wujud Benda", "5": "Cuaca & Musim", "6": "Daur Hidup Hewan"}}};
-export default function Page(){
+import { useSearchParams, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+// MAPPING MAPEL - FIX PPKN KECIL BESAR
+const MAPEL_ALIAS: any = {
+  "PPKN": ["PPKN", "Pendidikan Pancasila", "PKN", "Pancasila"],
+  "PAI": ["PAI", "Pendidikan Agama Islam"],
+  "IPAS": ["IPAS", "IPA", "IPS", "Ilmu Pengetahuan Alam dan Sosial"],
+  "MTK": ["MTK", "Matematika"],
+  "B. INDONESIA": ["B. INDONESIA", "Bahasa Indonesia", "BINDO", "B INDONESIA"],
+  "B. INGGRIS": ["B. INGGRIS", "Bahasa Inggris", "BING", "B INGGRIS"],
+};
+
+// JUDUL BAB - FIX DOUBLE BAB 5 - BAB 5
+const JUDUL_BAB_ALL: any = {
+  "bsj-sd1": {
+    "PPKN": { "1": "Lambang Garuda Pancasila", "2": "Aturan di Rumah dan Sekolah", "3": "Toleransi", "4": "Gotong Royong", "5": "Mengenal Pancasila", "6": "Bhinneka Tunggal Ika" },
+  },
+  "bsj-sd2": {
+    "PPKN": { "1": "Lambang dan Sila Pancasila", "2": "Aturan dan Tata Tertib", "3": "Hak dan Kewajiban", "4": "Gotong Royong di Sekolah", "5": "Musyawarah", "6": "Keberagaman di Rumah" },
+  },
+  "bsj-sd3": {
+    "PPKN": {
+      "5": "Hak dan Kewajiban serta Musyawarah",
+      "6": "Keberagaman Budaya dan Gotong Royong"
+    },
+    "PAI": {
+      "1": "Nabi dan Rasul", "2": "Shalat Fardhu", "3": "Akhlak Terpuji", "4": "Kisah Teladan Nabi", "5": "Doa Sehari-hari", "6": "Haji dan Ziarah"
+    },
+    "IPAS": {
+      "1": "Makhluk Hidup dan Lingkungannya", "2": "Wujud Zat dan Perubahannya", "3": "Energi dan Perubahannya", "4": "Ekosistem", "5": "Manusia dan Lingkungan", "6": "Bumi, Bulan dan Tata Surya"
+    },
+    "MTK": {
+      "1": "Bilangan Cacah Sampai 10.000", "2": "Penjumlahan dan Pengurangan", "3": "Perkalian dan Pembagian", "4": "Pecahan Sederhana", "5": "Pengukuran Panjang dan Berat", "6": "Bangun Datar"
+    },
+    "B. INDONESIA": {
+      "1": "Kalimat dan Tanda Baca", "2": "Teks Deskripsi", "3": "Teks Narasi", "4": "Puisi Anak", "5": "Teks Informasi", "6": "Pidato Singkat"
+    },
+    "B. INGGRIS": {
+      "1": "Greetings and Introduction", "2": "My Family", "3": "Numbers and Colors", "4": "Animals and Pets", "5": "Daily Activities", "6": "My Hobbies"
+    }
+  },
+  "bsj-sd4": {
+    "PPKN": { "1": "Pancasila Sebagai Dasar Negara", "2": "Hak dan Kewajiban", "3": "Keberagaman Budaya", "4": "Kerja Sama dan Gotong Royong", "5": "Musyawarah dan Demokrasi", "6": "NKRI dan Semangat Kebangsaan" },
+  },
+  "bsj-sd5": {
+    "PPKN": { "1": "Pancasila dan Nilai-nilainya", "2": "Norma dan Aturan", "3": "Keberagaman Sosial Budaya", "4": "Gotong Royong dan Kerja Sama", "5": "Musyawarah Mufakat", "6": "Cinta Tanah Air" },
+  },
+  "bsj-sd6": {
+    "PPKN": { "1": "Pancasila Sebagai Ideologi", "2": "Hak, Kewajiban dan Tanggung Jawab", "3": "Persatuan dan Kesatuan", "4": "Kerja Sama dalam Keberagaman", "5": "Demokrasi dan Musyawarah", "6": "Bela Negara" },
+  },
+};
+
+export default function LatihanPage() {
   const params = useParams();
-  const search = useSearchParams();
-  const kelasId = (params.kelas) || "bsj-sd1";
-  const kelas = kelasId.toUpperCase();
-  const mapel = search.get("mapel") || "PAI";
-  const bab = search.get("bab") || "1";
-  const judul = (JUDUL_BAB_ALL[kelasId] && JUDUL_BAB_ALL[kelasId][mapel] && JUDUL_BAB_ALL[kelasId][mapel][bab]) || "BAB "+bab;
-  const [soal, setSoal] = useState([]);
+  const searchParams = useSearchParams();
+  const kelas = (params.kelas as string)?.toLowerCase() || "";
+  const mapelParam = searchParams.get("mapel") || "PPKN";
+  const babParam = searchParams.get("bab") || "1";
+
+  const [soal, setSoal] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [jawab, setJawab] = useState({});
-  const [selesai, setSelesai] = useState(false);
-  const [nilai, setNilai] = useState(0);
-  const [benar, setBenar] = useState(0);
-  useEffect(()=>{
-    setLoading(true);
-    fetch(`/api/soal?kelas=${kelasId}&mapel=${mapel}&bab=${bab}`)
-      .then(r=>r.json())
-      .then(d=>{ setSoal(d.soal || []); setLoading(false); })
-      .catch(()=>setLoading(false));
-  },[kelasId, mapel, bab]);
-  const handleKumpul = () => {
-    const b = soal.filter((s)=>{
-      const j=(jawab[s.no]||"").toLowerCase().trim();
-      const k=String(s.kunci).toLowerCase().trim();
-      return j && (k.includes(j) || j===k || j.includes(k));
-    }).length;
-    const n = Math.round(b/soal.length*100);
-    setBenar(b); setNilai(n); setSelesai(true);
-    localStorage.setItem(`${kelasId}-${mapel}-${bab}`, String(n));
+  const [jawabanUser, setJawabanUser] = useState<any>({});
+
+  useEffect(() => {
+    async function fetchSoal() {
+      setLoading(true);
+      
+      // FIX MAPEL ALIAS - PPKN BISA KECIL BESAR
+      const aliasList = MAPEL_ALIAS[mapelParam.toUpperCase()] || [mapelParam];
+      
+      const { data, error } = await supabase
+        .from("soal")
+        .select("*")
+        .eq("kelas", kelas)
+        .in("mapel", aliasList)
+        .eq("bab_ke", parseInt(babParam))
+        .order("no_urut", { ascending: true });
+
+      if (error) {
+        console.error("Error fetch soal:", error);
+      } else {
+        setSoal(data || []);
+      }
+      setLoading(false);
+    }
+    fetchSoal();
+  }, [kelas, mapelParam, babParam]);
+
+  // FIX JUDUL BIAR GAK DOUBLE BAB 5 - BAB 5
+  const getJudulBab = () => {
+    const kelasUpper = kelas.toLowerCase();
+    const mapelUpper = mapelParam.toUpperCase();
+    const judulMap = JUDUL_BAB_ALL[kelasUpper]?.[mapelUpper]?.[babParam];
+    if (judulMap) return judulMap;
+    return `BAB ${babParam}`;
   };
-  if(loading){
-    return (<div className="min-h-screen bg-[#fffaf5] flex items-center justify-center"><div className="text-center"><img src="/mrh-logo.png" className="h-12 mx-auto mb-4 animate-pulse" /><p className="font-black text-orange-600">Loading {kelas} - {mapel} BAB {bab} - {judul}...</p><p className="text-xs text-gray-400">Ambil dari Supabase (30 soal)</p></div></div>);
+
+  const handleJawab = (no: number, opsi: string) => {
+    setJawabanUser({ ...jawabanUser, [no]: opsi });
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading soal {kelas} {mapelParam} BAB {babParam}...</div>;
   }
-  if(soal.length===0){
-    return (<div className="min-h-screen bg-[#fffaf5] p-6"><div className="max-w-2xl mx-auto bg-white p-8 rounded-2xl text-center border"><h1 className="font-black text-orange-600">SOAL BELUM DI-IMPORT</h1><p className="text-sm mt-2">{kelas} - {mapel} BAB {bab} - {judul}</p><a href={`/soal/${kelasId}`} className="inline-block mt-4 bg-orange-500 text-white px-6 py-2 rounded-xl">Dashboard</a></div></div>);
-  }
-  if(selesai){
-    let total=0, cnt=0;
-    for(let i=1;i<=6;i++){ const v=localStorage.getItem(`${kelasId}-${mapel}-${i}`); if(v){ total+=parseInt(v); cnt++; } }
-    const avg = cnt? Math.round(total/cnt):nilai;
-    return (<div className="min-h-screen bg-orange-50 p-4"><div className="max-w-md mx-auto"><div className="bg-white p-2 rounded-xl flex justify-center mb-4"><img src="/mrh-logo.png" className="h-10" /></div><div className="bg-white p-6 rounded-[24px] shadow-xl text-center"><p className="text-xs text-gray-500">{kelas} - {mapel} BAB {bab} - {judul}</p><h1 className="text-6xl font-black text-orange-500 mt-2">{nilai}</h1><p className="font-bold mt-2">{benar} dari {soal.length} benar</p><div className="mt-4 p-3 bg-gray-50 rounded-xl"><p className="text-xs">Nilai Akhir Mapel {mapel}</p><p className="text-xl font-black text-green-600">{avg} - {cnt}/6 BAB selesai</p></div><div className="flex gap-2 mt-6"><button onClick={()=>{setSelesai(false);setJawab({})}} className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-bold">Ulangi</button><a href={`/soal/${kelasId}`} className="flex-1 bg-gray-900 text-white py-3 rounded-xl text-center font-bold">Dashboard</a></div></div></div></div>);
-  }
-  return (<div className="min-h-screen bg-[#fffaf5]"><div className="sticky top-0 bg-white border-b p-3 z-10"><div className="max-w-3xl mx-auto flex justify-between items-center"><div className="flex items-center gap-2"><img src="/mrh-logo.png" className="h-8" /><h1 className="font-black text-orange-600 text-[11px] leading-tight">{kelas} - {mapel} BAB {bab} - {judul} - {soal.length} SOAL (Supabase)</h1></div><div className="flex gap-2"><a href={`/soal/${kelasId}`} className="text-[10px] bg-gray-100 px-2 py-1 rounded-full">Mapel</a><button onClick={handleKumpul} className="text-[10px] bg-green-600 text-white px-3 py-1 rounded-full font-bold">Kumpulkan</button></div></div></div><div className="max-w-3xl mx-auto p-3 space-y-3">{soal.map((s)=> (<div key={s.no} className="bg-white border p-4 rounded-2xl"><p className="font-bold text-sm"><span className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs mr-2">{s.no}</span>[{s.tipe}] {s.tanya}</p>{(s.tipe||"").toUpperCase()==="PG"? <div className="grid gap-2 mt-3">{(s.opsi||[]).map((o,i)=><label key={i} className="border p-2.5 rounded-xl text-sm flex gap-2 cursor-pointer hover:bg-orange-50"><input type="radio" name={`q${s.no}`} onChange={()=>setJawab({...jawab,[s.no]:["A","B","C","D"][i]})}/>{["A","B","C","D"][i]}. {o}</label>)}</div> : <textarea className="w-full border rounded-xl p-3 mt-3 text-sm" rows={2} value={jawab[s.no]||""} onChange={e=>setJawab({...jawab,[s.no]:e.target.value})} placeholder="Tulis jawaban..."/>}</div>))}<button onClick={handleKumpul} className="w-full bg-green-600 text-white py-4 rounded-2xl font-black text-sm">KUMPULKAN - SIMPAN SCORE BAB {bab}</button></div></div>);
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow">
+        <h1 className="font-bold text-sm md:text-base">
+          {kelas.toUpperCase()} - {mapelParam} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL (Supabase)
+        </h1>
+        <div className="flex gap-2">
+          <span className="text-xs bg-gray-100 px-2 py-1 rounded">Mapel</span>
+          <button className="text-xs bg-green-500 text-white px-3 py-1 rounded-full">Kumpulkan</button>
+        </div>
+      </div>
+
+      {/* LIST SOAL */}
+      <div className="space-y-4">
+        {soal.map((s: any, idx: number) => {
+          // FIX CASE SENSITIVE - PG BISA pg / Pg / pG
+          const isPG = (s.tipe_soal || s.tipe || "").toUpperCase() === "PG";
+          const opsiList = [
+            { key: "A", text: s.opsi_a },
+            { key: "B", text: s.opsi_b },
+            { key: "C", text: s.opsi_c },
+            { key: "D", text: s.opsi_d },
+          ].filter((o) => o.text && o.text.trim() !== "");
+
+          return (
+            <div key={s.id || idx} className="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-sm">
+              <div className="font-bold text-sm mb-3">
+                <span className="bg-orange-400 text-white px-2 py-0.5 rounded text-xs mr-2">{s.no_urut || idx + 1}</span>
+                [{s.tipe_soal || "pg"}] {s.pertanyaan}
+              </div>
+
+              {isPG && opsiList.length > 0 ? (
+                <div className="space-y-2">
+                  {opsiList.map((opsi) => (
+                    <label
+                      key={opsi.key}
+                      className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer hover:bg-blue-50 ${
+                        jawabanUser[s.no_urut] === opsi.key ? "bg-blue-100 border-blue-400" : "border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`soal-${s.no_urut}`}
+                        value={opsi.key}
+                        checked={jawabanUser[s.no_urut] === opsi.key}
+                        onChange={() => handleJawab(s.no_urut, opsi.key)}
+                        className="accent-blue-600"
+                      />
+                      <span className="text-sm">
+                        {opsi.key}. {opsi.text}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <textarea
+                    placeholder="Tulis jawaban..."
+                    className="w-full border rounded-lg p-3 text-sm min-h-[80px]"
+                    onChange={(e) => handleJawab(s.no_urut, e.target.value)}
+                  />
+                </div>
+              )}
+
+              {s.pembahasan && jawabanUser[s.no_urut] && (
+                <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
+                  <b>Pembahasan:</b> {s.pembahasan} <br />
+                  <b>Kunci:</b> {s.jawaban}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {soal.length === 0 && (
+        <div className="text-center p-8 bg-white rounded-xl">
+          Soal tidak ditemukan untuk {kelas} {mapelParam} BAB {babParam}. Cek Supabase!
+        </div>
+      )}
+    </div>
+  );
 }
