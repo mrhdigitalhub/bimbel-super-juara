@@ -1,108 +1,22 @@
 "use client";
 import { useState, Suspense } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-
-const BANK_SOAL: any = {
-  "Matematika": {
-    "1": [
-      {no:1,tipe:"PG",tanya:"Lambang bilangan untuk 'lima' adalah...",opsi:["3","5","7","9"],kunci:"B"},
-      {no:2,tipe:"PG",tanya:"7 - 2 =...",opsi:["4","5","6","7"],kunci:"B"},
-      {no:3,tipe:"PG",tanya:"Hitung: 4 + 3 =...",opsi:["5","6","7","8"],kunci:"C"},
-      {no:4,tipe:"PG",tanya:"Bilangan setelah 8 adalah...",opsi:["7","8","9","10"],kunci:"C"},
-      {no:5,tipe:"PG",tanya:"Bentuk panjang dari 10 adalah...",opsi:["10+0","1+0","10-0","1"],kunci:"A"},
-      {no:6,tipe:"PG",tanya:"Ada 5 apel, dimakan 2, sisa...",opsi:["2","3","4","5"],kunci:"B"},
-      {no:7,tipe:"PG",tanya:"Urutan dari kecil: 9, 5, 7 adalah...",opsi:["9,7,5","5,7,9","7,5,9","5,9,7"],kunci:"B"},
-      {no:8,tipe:"PG",tanya:"Simbol > artinya...",opsi:["lebih kecil","sama dengan","lebih besar","kurang"],kunci:"C"},
-      {no:9,tipe:"PG",tanya:"2 + 2 + 2 =...",opsi:["4","5","6","7"],kunci:"C"},
-      {no:10,tipe:"PG",tanya:"Bilangan ganjil antara 1-10 adalah...",opsi:["2,4,6","1,3,5,7,9","10","0"],kunci:"B"},
-      {no:11,tipe:"PG",tanya:"Jika kamu punya 10 kelereng diberi 3, jadi...",opsi:["7","13","10","3"],kunci:"B"},
-      {no:12,tipe:"PG",tanya:"Angka sebelum 10 adalah...",opsi:["11","9","8","10"],kunci:"B"},
-      {no:13,tipe:"PG",tanya:"10 - 5 =...",opsi:["5","10","15","0"],kunci:"A"},
-      {no:14,tipe:"PG",tanya:"Lambang bilangan 8 seperti...",opsi:["bola","kacamata","kursi","meja"],kunci:"B"},
-      {no:15,tipe:"PG",tanya:"3 + 4 = 7, maka 4 + 3 =...",opsi:["7","6","8","3"],kunci:"A"},
-      {no:16,tipe:"ISIAN",tanya:"Tulis lambang bilangan delapan:...",kunci:"8"},
-      {no:17,tipe:"ISIAN",tanya:"5 +... = 9",kunci:"4"},
-      {no:18,tipe:"ISIAN",tanya:"Bilangan setelah 6 adalah...",kunci:"7"},
-      {no:19,tipe:"ISIAN",tanya:"Hitung: 10 - 3 =...",kunci:"7"},
-      {no:20,tipe:"ISIAN",tanya:"Ada 4 bebek, datang 3 lagi, total...",kunci:"7"},
-      {no:21,tipe:"ISIAN",tanya:"Urutan 1 sampai 5: 1,2,3,4,...",kunci:"5"},
-      {no:22,tipe:"ISIAN",tanya:"6 lebih... dari 4",kunci:"besar"},
-      {no:23,tipe:"ISIAN",tanya:"2 + 8 =...",kunci:"10"},
-      {no:24,tipe:"URAIAN",tanya:"Jelaskan cara menghitung 5 + 4 dengan jari tangan!",kunci:"tunjukkan 5 jari tambah 4 jari jadi 9"},
-      {no:25,tipe:"URAIAN",tanya:"Gambarlah 7 bintang!",kunci:"7 bintang"},
-      {no:26,tipe:"URAIAN",tanya:"Budi punya 10 permen, diberikan ke adik 4. Berapa sisa? Jelaskan!",kunci:"6 permen"},
-      {no:27,tipe:"URAIAN",tanya:"Sebutkan 3 bilangan yang lebih besar dari 5 tapi kurang dari 10!",kunci:"6,7,8,9"},
-      {no:28,tipe:"URAIAN",tanya:"Bagaimana cara membandingkan 8 dan 3?",kunci:"8 lebih besar dari 3"},
-      {no:29,tipe:"URAIAN",tanya:"Buat cerita penjumlahan yang hasilnya 10!",kunci:"cerita penjumlahan"},
-      {no:30,tipe:"URAIAN",tanya:"Jika ada 9 kursi dan 10 anak, apakah semua anak dapat kursi? Jelaskan!",kunci:"tidak, kurang 1 kursi"},
-    ]
-  }
-};
+const BANK_SOAL:any={"Matematika":{"1":[{no:1,tipe:"PG",tanya:"Lambang bilangan untuk 'lima' adalah...",opsi:["3","5","7","9"],kunci:"B"},{no:2,tipe:"PG",tanya:"7 - 2 =...",opsi:["4","5","6","7"],kunci:"B"},{no:3,tipe:"PG",tanya:"Hitung: 4 + 3 =...",opsi:["5","6","7","8"],kunci:"C"},{no:4,tipe:"PG",tanya:"Bilangan setelah 8 adalah...",opsi:["7","8","9","10"],kunci:"C"},{no:5,tipe:"PG",tanya:"Bentuk panjang dari 10 adalah...",opsi:["10+0","1+0","10-0","1"],kunci:"A"},{no:6,tipe:"PG",tanya:"Ada 5 apel, dimakan 2, sisa...",opsi:["2","3","4","5"],kunci:"B"},{no:7,tipe:"PG",tanya:"Urutan dari kecil: 9, 5, 7 adalah...",opsi:["9,7,5","5,7,9","7,5,9","5,9,7"],kunci:"B"},{no:8,tipe:"PG",tanya:"Simbol > artinya...",opsi:["lebih kecil","sama dengan","lebih besar","kurang"],kunci:"C"},{no:9,tipe:"PG",tanya:"2 + 2 + 2 =...",opsi:["4","5","6","7"],kunci:"C"},{no:10,tipe:"PG",tanya:"Bilangan ganjil antara 1-10 adalah...",opsi:["2,4,6","1,3,5,7,9","10","0"],kunci:"B"},{no:11,tipe:"PG",tanya:"Jika punya 10 kelereng diberi 3, jadi...",opsi:["7","13","10","3"],kunci:"B"},{no:12,tipe:"PG",tanya:"Angka sebelum 10 adalah...",opsi:["11","9","8","10"],kunci:"B"},{no:13,tipe:"PG",tanya:"10 - 5 =...",opsi:["5","10","15","0"],kunci:"A"},{no:14,tipe:"PG",tanya:"Lambang bilangan 8 seperti...",opsi:["bola","kacamata","kursi","meja"],kunci:"B"},{no:15,tipe:"PG",tanya:"3 + 4 = 7, maka 4 + 3 =...",opsi:["7","6","8","3"],kunci:"A"},{no:16,tipe:"ISIAN",tanya:"Tulis lambang bilangan delapan:...",kunci:"8"},{no:17,tipe:"ISIAN",tanya:"5 +... = 9",kunci:"4"},{no:18,tipe:"ISIAN",tanya:"Bilangan setelah 6 adalah...",kunci:"7"},{no:19,tipe:"ISIAN",tanya:"Hitung: 10 - 3 =...",kunci:"7"},{no:20,tipe:"ISIAN",tanya:"Ada 4 bebek, datang 3 lagi, total...",kunci:"7"},{no:21,tipe:"ISIAN",tanya:"Urutan 1 sampai 5: 1,2,3,4,...",kunci:"5"},{no:22,tipe:"ISIAN",tanya:"6 lebih... dari 4",kunci:"besar"},{no:23,tipe:"ISIAN",tanya:"2 + 8 =...",kunci:"10"},{no:24,tipe:"URAIAN",tanya:"Jelaskan cara menghitung 5 + 4 dengan jari tangan!",kunci:"tunjukkan"},{no:25,tipe:"URAIAN",tanya:"Gambarlah 7 bintang!",kunci:"7"},{no:26,tipe:"URAIAN",tanya:"Budi punya 10 permen, diberikan ke adik 4. Berapa sisa? Jelaskan!",kunci:"6"},{no:27,tipe:"URAIAN",tanya:"Sebutkan 3 bilangan yang lebih besar dari 5 tapi kurang dari 10!",kunci:"6"},{no:28,tipe:"URAIAN",tanya:"Bagaimana cara membandingkan 8 dan 3?",kunci:"8"},{no:29,tipe:"URAIAN",tanya:"Buat cerita penjumlahan yang hasilnya 10!",kunci:"cerita"},{no:30,tipe:"URAIAN",tanya:"Jika ada 9 kursi dan 10 anak, apakah semua anak dapat kursi? Jelaskan!",kunci:"tidak"}]}};
 
 function IsiLatihan(){
-  const params = useParams() as any;
-  const search = useSearchParams();
-  const kelas = (params.kelas || "bsj-sd1").toUpperCase();
-  const mapel = search.get("mapel") || "Matematika";
-  const bab = search.get("bab") || "1";
-  const soal = (BANK_SOAL[mapel]?.[bab] || BANK_SOAL["Matematika"]["1"]);
-
+  const params=useParams() as any;
+  const search=useSearchParams();
+  const rawKelas=params.kelas;
+  const kelasFix = rawKelas && rawKelas!=="undefined"? rawKelas : "bsj-sd1";
+  const kelas=kelasFix.toUpperCase();
+  const mapel=search.get("mapel")||"Matematika";
+  const bab=search.get("bab")||"1";
+  const soal=(BANK_SOAL[mapel]?.[bab]||BANK_SOAL["Matematika"]["1"]);
   const [jawab,setJawab]=useState<Record<number,string>>({});
   const [show,setShow]=useState(false);
-
-  const benar = soal.filter((s:any)=>{
-    const j=(jawab[s.no]||"").toLowerCase().trim();
-    if(s.tipe==="PG") return j===s.kunci;
-    return j.includes(s.kunci.toLowerCase()) || j===s.kunci.toLowerCase();
-  }).length;
-  const nilai = Math.round(benar/soal.length*100);
-
-  if(show) return (
-    <div className="min-h-screen bg-orange-50 p-6 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full">
-        <h1 className="text-5xl font-black text-orange-500">{nilai}</h1>
-        <p className="mt-2 font-bold">{kelas} - {mapel} BAB {bab}</p>
-        <p className="text-gray-500">{benar} benar dari 30 soal</p>
-        <div className="mt-4 w-full bg-gray-200 h-3 rounded-full overflow-hidden"><div className="bg-green-500 h-3" style={{width:`${nilai}%`}}></div></div>
-        <div className="flex gap-2 mt-6">
-          <button onClick={()=>{setShow(false);setJawab({})}} className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-bold">Ulangi</button>
-          <a href={`/soal/${params.kelas}`} className="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-center">Mapel</a>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-[#fffaf5] p-2 md:p-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="sticky top-0 bg-white/90 backdrop-blur border rounded-xl p-3 flex justify-between items-center mb-4 shadow-sm">
-          <div><h1 className="font-black text-orange-600 text-sm md:text-base">{kelas} - {mapel} - BAB {bab}</h1><p className="text-xs text-gray-500">{Object.keys(jawab).length}/30 dijawab</p></div>
-          <div className="flex gap-2"><a href={`/soal/${params.kelas}`} className="text-xs bg-gray-100 px-3 py-2 rounded-lg">← Mapel</a><button onClick={()=>setShow(true)} className="text-xs bg-green-600 text-white px-4 py-2 rounded-lg font-bold">Kumpulkan</button></div>
-        </div>
-        <div className="space-y-3">
-          {soal.map((s:any)=>(
-            <div key={s.no} className="bg-white border border-orange-100 p-4 rounded-2xl shadow-sm">
-              <p className="font-bold text-sm"><span className="bg-orange-500 text-white px-2 py-0.5 rounded mr-2 text-xs">{s.no}</span>[{s.tipe}] {s.tanya}</p>
-              {s.tipe==="PG"? (
-                <div className="grid gap-2 mt-3">
-                  {s.opsi.map((o:string,idx:number)=>{
-                    const huruf=["A","B","C","D"][idx];
-                    const active=jawab[s.no]===huruf;
-                    return <label key={huruf} className={`border-2 p-3 rounded-xl cursor-pointer flex items-center gap-2 ${active?'bg-orange-50 border-orange-400 font-bold':'bg-white border-gray-200'}`}><input type="radio" name={`q${s.no}`} className="accent-orange-500" checked={active} onChange={()=>setJawab({...jawab,[s.no]:huruf})}/>{huruf}. {o}</label>
-                  })}
-                </div>
-              ) : (
-                <textarea className="w-full mt-3 border-2 border-gray-200 rounded-xl p-3 text-sm focus:border-orange-400 outline-none" rows={2} placeholder="Ketik jawaban..." value={jawab[s.no]||""} onChange={e=>setJawab({...jawab,[s.no]:e.target.value})}/>
-              )}
-            </div>
-          ))}
-        </div>
-        <button onClick={()=>setShow(true)} className="w-full mt-6 bg-green-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg">KUMPULKAN - LIHAT NILAI</button>
-      </div>
-    </div>
-  );
+  const benar=soal.filter((s:any)=>{const j=(jawab[s.no]||"").toLowerCase().trim();if(s.tipe==="PG") return j===s.kunci;return j.includes(s.kunci.toLowerCase())||j===s.kunci.toLowerCase();}).length;
+  const nilai=Math.round(benar/soal.length*100);
+  if(show) return <div className="min-h-screen bg-orange-50 p-6 flex items-center justify-center"><div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full"><h1 className="text-5xl font-black text-orange-500">{nilai}</h1><p className="mt-2 font-bold">{kelas} - {mapel} BAB {bab}</p><p className="text-gray-500">{benar} benar dari 30 soal</p><div className="mt-4 w-full bg-gray-200 h-3 rounded-full overflow-hidden"><div className="bg-green-500 h-3" style={{width:`${nilai}%`}}></div></div><div className="flex gap-2 mt-6"><button onClick={()=>{setShow(false);setJawab({})}} className="flex-1 bg-orange-500 text-white py-3 rounded-xl font-bold">Ulangi</button><a href={`/soal/${kelasFix}`} className="flex-1 bg-gray-100 py-3 rounded-xl font-bold text-center">Mapel</a></div></div></div>;
+  return <div className="min-h-screen bg-[#fffaf5] p-2 md:p-4"><div className="max-w-3xl mx-auto"><div className="sticky top-0 bg-white/90 backdrop-blur border rounded-xl p-3 flex justify-between items-center mb-4 shadow-sm"><div><h1 className="font-black text-orange-600 text-sm md:text-base">{kelas} - {mapel} - BAB {bab}</h1><p className="text-xs text-gray-500">{Object.keys(jawab).length}/30 dijawab</p></div><div className="flex gap-2"><a href={`/soal/${kelasFix}`} className="text-xs bg-gray-100 px-3 py-2 rounded-lg">← Mapel</a><button onClick={()=>setShow(true)} className="text-xs bg-green-600 text-white px-4 py-2 rounded-lg font-bold">Kumpulkan</button></div></div><div className="space-y-3">{soal.map((s:any)=><div key={s.no} className="bg-white border border-orange-100 p-4 rounded-2xl shadow-sm"><p className="font-bold text-sm"><span className="bg-orange-500 text-white px-2 py-0.5 rounded mr-2 text-xs">{s.no}</span>[{s.tipe}] {s.tanya}</p>{s.tipe==="PG"?<div className="grid gap-2 mt-3">{s.opsi.map((o:string,idx:number)=>{const huruf=["A","B","C","D"][idx];const active=jawab[s.no]===huruf;return <label key={huruf} className={`border-2 p-3 rounded-xl cursor-pointer flex items-center gap-2 ${active?'bg-orange-50 border-orange-400 font-bold':'bg-white border-gray-200'}`}><input type="radio" name={`q${s.no}`} className="accent-orange-500" checked={active} onChange={()=>setJawab({...jawab,[s.no]:huruf})}/>{huruf}. {o}</label>})}</div>:<textarea className="w-full mt-3 border-2 border-gray-200 rounded-xl p-3 text-sm focus:border-orange-400 outline-none" rows={2} placeholder="Ketik jawaban..." value={jawab[s.no]||""} onChange={e=>setJawab({...jawab,[s.no]:e.target.value})}/>}</div>)}</div><button onClick={()=>setShow(true)} className="w-full mt-6 bg-green-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg">KUMPULKAN - LIHAT NILAI</button></div></div>;
 }
-
-export default function Page(){
-  return <Suspense fallback={<div className="p-6">Loading soal...</div>}><IsiLatihan/></Suspense>;
-}
+export default function Page(){return <Suspense fallback={<div className="p-6">Loading...</div>}><IsiLatihan/></Suspense>;}
