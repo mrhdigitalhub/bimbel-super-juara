@@ -1,30 +1,48 @@
+// src/app/soal/[kelas]/latihan/page.tsx - FIX 100% JUARA
 "use client";
-export const dynamic = 'force-dynamic';
-import Link from "next/link";
+import { useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
-const KELAS = [
-  {id:"sd1", nama:"SD Kelas 1", emoji:"🎒", color:"bg-yellow-300"},
-  {id:"sd2", nama:"SD Kelas 2", emoji:"📚", color:"bg-green-300"},
-  {id:"sd3", nama:"SD Kelas 3", emoji:"✏️", color:"bg-blue-300"},
-  {id:"sd4", nama:"SD Kelas 4", emoji:"📖", color:"bg-purple-300"},
-  {id:"sd5", nama:"SD Kelas 5", emoji:"🎓", color:"bg-pink-300"},
-  {id:"sd6", nama:"SD Kelas 6", emoji:"🏆", color:"bg-orange-300"},
-];
+export default function LatihanPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const rawKelas = params.kelas as string;
+  const mapel = searchParams.get('mapel') || 'IPAS';
 
-export default function SoalPage(){
-  return(
-    <div className="max-w-5xl mx-auto p-6 pb-20">
-      <h1 className="text-4xl font-black">PILIH KELAS JUARA!</h1>
-      <p className="font-bold text-slate-600 mt-2">6 Kelas • @600 Soal • 5 Mapel @120</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
-        {KELAS.map(k=>(
-          <Link key={k.id} href={`/soal/${k.id}`} className={`${k.color} border- border-black rounded- p-6 shadow-[6px_6px_0px_black] hover:translate-y-1 block`}>
-            <div className="text-4xl">{k.emoji}</div>
-            <div className="font-black text-xl mt-2">{k.nama.toUpperCase()}</div>
-            <div className="font-bold text-sm mt-1">600 Soal • 5 Mapel • HOTS</div>
-          </Link>
-        ))}
-      </div>
+  // FIX ANTI bsj-bsj-sd2
+  const kelasId = rawKelas?.startsWith("bsj-")? rawKelas : `bsj-${rawKelas}`;
+
+  const [soal, setSoal] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const { data, error } = await supabase
+       .from('soal')
+       .select('*')
+       .eq('kelas', kelasId)
+       .eq('mapel', mapel)
+       .order('no_urut', { ascending: true });
+
+      if (error) {
+        console.error(error);
+      } else {
+        setSoal(data || []);
+      }
+      setLoading(false);
+    }
+    load();
+  }, [kelasId, mapel]);
+
+  if (loading) return <div className="p-10">Loading {kelasId} - {mapel}...</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-xl font-bold">{kelasId} - {mapel} ({soal.length} Soal)</h1>
+      {/* render soal kamu selanjutnya */}
+      <pre className="mt-4 text-xs">{JSON.stringify(soal.slice(0,1), null, 2)}</pre>
     </div>
-  )
+  );
 }
