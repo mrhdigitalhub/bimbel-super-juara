@@ -107,6 +107,8 @@ export default function Admin(){
             <div>
               <label className="text-[10px] font-black text-[#FFD700] tracking-widest">MASA AKTIF (HARI)</label>
               <select value={durasi} onChange={e=>setDurasi(parseInt(e.target.value))} className="mt-2 w-full h-12 bg-[#1E1E1E] border-2 border-[#22C55E]/40 rounded-[12px] px-3 font-black text-[#22C55E] text-[16px]">
+                <option value={30}>1 Bulan (30 Hari)</option>
+                <option value={60}>2 Bulan (60 Hari)</option>
                 <option value={90}>3 Bulan (90 Hari) - REKOMENDASI</option>
                 <option value={180}>6 Bulan (180 Hari)</option>
                 <option value={365}>12 Bulan (365 Hari / 1 Tahun)</option>
