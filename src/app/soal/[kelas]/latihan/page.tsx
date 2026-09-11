@@ -14,8 +14,7 @@ function getKanonikalMapel(mapelParam: string): string {
   return raw.toUpperCase() === "BINDO" ? "B. INDONESIA" : decodeURIComponent(mapelParam).toUpperCase();
 }
 
-// LENGKAP 180 JUDUL BAB - 6 KELAS x 5 MAPEL x 6 BAB
-const JUDUL_BAB_LENGKAP: Record<string, Record<string, Record<string, string>>> = {
+const JUDUL_BAB_LENGKAP: any = {
   "bsj-sd1": {
     "PPKN": { "1": "Lambang Garuda Pancasila", "2": "Aturan di Rumah dan Sekolah", "3": "Toleransi dan Keberagaman", "4": "Gotong Royong", "5": "Mengenal Pancasila", "6": "Bhinneka Tunggal Ika" },
     "PAI": { "1": "Mengenal Huruf Hijaiyah", "2": "Rukun Iman", "3": "Rukun Islam", "4": "Kisah Nabi Muhammad", "5": "Doa Sehari-hari", "6": "Akhlak Terpuji" },
@@ -73,6 +72,7 @@ export default function LatihanPage() {
   const [saving, setSaving] = useState(false);
 
   const kanonikalMapel = getKanonikalMapel(mapelParam);
+  const getJudulBab = () => JUDUL_BAB_LENGKAP[kelas]?.[kanonikalMapel]?.[babParam] || `BAB ${babParam}`;
 
   useEffect(() => {
     async function fetchSoal() {
@@ -83,8 +83,6 @@ export default function LatihanPage() {
     }
     fetchSoal();
   }, [kelas, mapelParam, babParam, kanonikalMapel]);
-
-  const getJudulBab = () => JUDUL_BAB_LENGKAP[kelas]?.[kanonikalMapel]?.[babParam] || `BAB ${babParam}`;
 
   const handleJawab = (no: number, opsi: string) => setJawabanUser({ ...jawabanUser, [no]: opsi });
 
@@ -97,27 +95,32 @@ export default function LatihanPage() {
     setSaving(true);
     try { await supabase.from("skor_bab").insert({ kelas, mapel: kanonikalMapel, bab_ke: parseInt(babParam), judul_bab: getJudulBab(), total_soal: total, benar, salah: total - benar, skor }); } catch {}
     setSaving(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (loading) return <div className="p-8 text-center">Loading {kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam}...</div>;
+  if (loading) return <div className="p-8 text-center">Loading {kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam} - {getJudulBab()}...</div>;
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white p-4 rounded-xl shadow mb-6 border">
-        <h1 className="font-bold text-sm md:text-base">{kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL</h1>
-        <div className="text-xs text-gray-500 mt-1">Mapel: {kanonikalMapel} | Judul BAB: {getJudulBab()}</div>
+      {/* HEADER FINAL - ADA NAMA BAB + TOMBOL SCORE! */}
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow border">
+        <div>
+          <h1 className="font-bold text-sm md:text-base">{kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL</h1>
+          <div className="text-xs text-gray-500 mt-1">Mapel: {kanonikalMapel} | Judul: {getJudulBab()}</div>
+        </div>
+        <button onClick={handleKumpulkan} className="text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-bold whitespace-nowrap">Kumpulkan & Lihat Score</button>
       </div>
 
       {hasil?.show && (
         <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-xl mb-6 shadow-lg">
-          <h2 className="text-xl font-bold mb-2">🎉 Score {kanonikalMapel} BAB {babParam}: {hasil.skor}%</h2>
+          <h2 className="text-xl font-bold mb-1">🎉 Score {kanonikalMapel} BAB {babParam}: {hasil.skor}%</h2>
           <p className="text-sm opacity-90 mb-3">{getJudulBab()}</p>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="bg-white/20 rounded-lg p-3"><div className="text-2xl font-bold">{hasil.benar}</div><div className="text-xs">Benar</div></div>
             <div className="bg-white/20 rounded-lg p-3"><div className="text-2xl font-bold">{hasil.salah}</div><div className="text-xs">Salah</div></div>
             <div className="bg-white/20 rounded-lg p-3"><div className="text-2xl font-bold">{hasil.skor}%</div><div className="text-xs">Score</div></div>
           </div>
-          <div className="mt-4 flex gap-2"><a href={`/soal/${kelas}`} className="bg-white text-green-600 px-4 py-2 rounded-full text-xs font-bold">Lihat Total Score {kelas.toUpperCase()}</a><span className="text-xs self-center">{saving ? "Menyimpan..." : "✅ Score tersimpan!"}</span></div>
+          <div className="mt-4 flex gap-2"><a href={`/soal/${kelas}`} className="bg-white text-green-600 px-4 py-2 rounded-full text-xs font-bold">Lihat Total Score {kelas.toUpperCase()}</a><span className="text-xs self-center">{saving ? "Menyimpan..." : "✅ Score tersimpan di Supabase!"}</span></div>
         </div>
       )}
 
@@ -136,8 +139,8 @@ export default function LatihanPage() {
           );
         })}
       </div>
-      {soal.length === 0 && <div className="text-center p-8 bg-white rounded-xl">Soal tidak ditemukan {kelas} {kanonikalMapel} BAB {babParam}</div>}
-      {soal.length > 0 && !hasil?.show && <div className="mt-6 text-center"><button onClick={handleKumpulkan} className="bg-green-500 text-white px-8 py-3 rounded-full font-bold">Kumpulkan & Hitung Score {kanonikalMapel} BAB {babParam}</button></div>}
+      {soal.length === 0 && <div className="text-center p-8 bg-white rounded-xl">Soal tidak ditemukan</div>}
+      <div className="mt-8 text-center"><button onClick={handleKumpulkan} className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg">Kumpulkan & Hitung Score BAB {babParam} - {getJudulBab()}</button></div>
     </div>
   );
 }
