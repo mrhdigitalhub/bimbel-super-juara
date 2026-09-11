@@ -48,6 +48,14 @@ const JUDUL_BAB_LENGKAP: any = {
   },
 };
 
+const MAPEL_STYLE: any = {
+  "PPKN": { bg: "bg-blue-50", border: "border-blue-300", headerBg: "bg-blue-100", icon: "/icons/ppkn.png", color: "Pastel Biru" },
+  "B. INDONESIA": { bg: "bg-red-50", border: "border-red-300", headerBg: "bg-red-100", icon: "/icons/bindo.png", color: "Pastel Merah" },
+  "MTK": { bg: "bg-green-50", border: "border-green-300", headerBg: "bg-green-100", icon: "/icons/mtk.png", color: "Pastel Hijau" },
+  "IPAS": { bg: "bg-yellow-50", border: "border-yellow-300", headerBg: "bg-yellow-100", icon: "/icons/ipas.png", color: "Pastel Kuning" },
+  "PAI": { bg: "bg-amber-50", border: "border-amber-300", headerBg: "bg-amber-100", icon: "/icons/pai.png", color: "Pastel Emas" },
+};
+
 export default function KelasDashboardLengkap() {
   const params = useParams();
   const kelas = (params.kelas as string)?.toLowerCase() || "";
@@ -71,16 +79,13 @@ export default function KelasDashboardLengkap() {
   const totalScore = selesai > 0 ? Math.round(skorData.reduce((a, b) => a + b.skor, 0) / selesai) : 0;
   const totalBenar = skorData.reduce((a, b) => a + b.benar, 0);
   const progress = Math.round((selesai / totalBAB) * 100);
-
   const mapels = ["PPKN", "B. INDONESIA", "MTK", "IPAS", "PAI"];
-
   const getSkorBab = (mapel: string, bab: number) => skorData.find((s) => s.mapel === mapel && s.bab_ke === bab);
 
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-xl font-bold mb-4">{kelas.toUpperCase()} - Dashboard Score Lengkap 30 BAB</h1>
 
-      {/* TOTAL SCORE */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-2xl mb-6 shadow-xl">
         <div className="flex justify-between items-center">
           <div>
@@ -90,27 +95,31 @@ export default function KelasDashboardLengkap() {
           </div>
           <div className="text-center"><div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">{progress}%</div><div className="text-xs mt-1">Progress</div></div>
         </div>
-        <div className="w-full bg-white/20 rounded-full h-3 mt-4"><div className="bg-white h-3 rounded-full transition-all" style={{ width: `${progress}%` }}></div></div>
+        <div className="w-full bg-white/20 rounded-full h-3 mt-4"><div className="bg-white h-3 rounded-full" style={{ width: `${progress}%` }}></div></div>
       </div>
 
-      {/* PER MAPEL DENGAN 6 BAB NYA! */}
       <div className="space-y-6">
         {mapels.map((mapel) => {
+          const style = MAPEL_STYLE[mapel];
           const skorMapel = skorData.filter((s) => s.mapel === mapel);
           const selesaiMapel = skorMapel.length;
           const rataMapel = selesaiMapel > 0 ? Math.round(skorMapel.reduce((a, b) => a + b.skor, 0) / selesaiMapel) : 0;
           return (
-            <div key={mapel} className="bg-white rounded-xl shadow border p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="font-bold">{mapel} <span className="text-xs font-normal text-gray-500">{selesaiMapel}/6 BAB - Rata {rataMapel}%</span></h2>
-                <div className="w-24 bg-gray-200 rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(selesaiMapel / 6) * 100}%` }}></div></div>
+            <div key={mapel} className={`${style.bg} ${style.border} border-2 rounded-xl shadow p-4`}>
+              <div className={`flex justify-between items-center mb-3 ${style.headerBg} p-3 rounded-lg`}>
+                <h2 className="font-bold flex items-center gap-3">
+                  <img src={style.icon} alt={mapel} className="w-12 h-12 object-contain drop-shadow" />
+                  <span className="text-base">{mapel}</span>
+                  <span className="text-xs font-normal text-gray-600 ml-2">{selesaiMapel}/6 BAB - Rata {rataMapel}% - {style.color}</span>
+                </h2>
+                <div className="w-24 bg-white rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(selesaiMapel / 6) * 100}%` }}></div></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[1, 2, 3, 4, 5, 6].map((bab) => {
                   const judul = JUDUL_BAB_LENGKAP[kelas]?.[mapel]?.[bab.toString()] || `BAB ${bab}`;
                   const skor = getSkorBab(mapel, bab);
                   return (
-                    <a key={bab} href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(mapel)}&bab=${bab}`} className={`border rounded-lg p-3 hover:shadow-md transition block ${skor ? "border-green-300 bg-green-50" : "border-gray-200 bg-white"}`}>
+                    <a key={bab} href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(mapel)}&bab=${bab}`} className={`border rounded-lg p-3 hover:shadow-md transition block bg-white ${skor ? "border-green-400" : "border-gray-200"}`}>
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="text-xs text-gray-500">BAB {bab}</div>
@@ -126,20 +135,6 @@ export default function KelasDashboardLengkap() {
             </div>
           );
         })}
-      </div>
-
-      {/* HISTORY */}
-      <div className="bg-white rounded-xl shadow p-4 mt-6">
-        <h2 className="font-bold mb-3">History Score Per BAB (Terbaru)</h2>
-        <div className="space-y-2">
-          {skorData.length === 0 && <div className="text-sm text-gray-500">Belum ada BAB yang dikerjakan. Mulai kerjakan soal!</div>}
-          {[...skorData].reverse().slice(0, 10).map((b: any) => (
-            <div key={b.id} className="flex justify-between items-center border-b py-2 text-sm">
-              <div><b>{b.mapel} BAB {b.bab_ke}</b> - {b.judul_bab}</div>
-              <div className="flex gap-2"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">{b.benar}/{b.total_soal}</span><span className={`px-2 py-0.5 rounded-full text-xs font-bold ${b.skor >= 80 ? "bg-green-500 text-white" : b.skor >= 60 ? "bg-yellow-500 text-white" : "bg-red-500 text-white"}`}>{b.skor}%</span></div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
