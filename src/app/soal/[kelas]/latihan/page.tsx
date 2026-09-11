@@ -1,5 +1,5 @@
-// app/soal/[kelas]/latihan/page.tsx - GANTI TOTAL FILE LAMA KAMU DENGAN INI
-import { createClient } from '@/lib/supabase'
+// src/app/soal/[kelas]/latihan/page.tsx - FIX VERCEL ERROR
+import { supabase } from '@/lib/supabase'
 import LatihanClient from './LatihanClient'
 
 export default async function Page({ 
@@ -9,7 +9,6 @@ export default async function Page({
   params: { kelas: string }, 
   searchParams: { mapel: string, bab: string } 
 }) {
-  const supabase = createClient()
   const kelas = params.kelas
   const mapel = searchParams.mapel
   const bab = parseInt(searchParams.bab)
