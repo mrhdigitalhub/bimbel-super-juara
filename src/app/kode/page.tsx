@@ -1,10 +1,14 @@
-export const dynamic = 'force-dynamic'
 "use client"
+export const dynamic = 'force-dynamic'
+
 import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 function KodeContent() {
   const router = useRouter()
@@ -21,25 +25,20 @@ function KodeContent() {
 
   useEffect(()=>{
     if(!kode) return
-    // baca durasi real dari DB
     supabase.from("kode_akses").select("durasi_hari,created_at,expired_at").eq("kode", kode.trim().toUpperCase()).maybeSingle().then(({data})=>{
       if(!data) return
       let d = (data as any).durasi_hari
       if(!d && data.created_at && data.expired_at) d = Math.round((new Date(data.expired_at).getTime()-new Date(data.created_at).getTime())/86400000)
       if(d) setDurasi(d)
-      console.log("durasi DB:", d, data) // cek di F12
     })
   },[kode])
 
   const handleAktifkan = async () => {
     if(!hpOrtu ||!hpAnak ||!nama) return alert("Lengkapi HP Ortu, HP Anak, Nama!")
     setLoading(true)
-    const { error } = await supabase.from("kode_akses").update({ status: "TERPAKAI", hp_ortu: hpOrtu, hp_anak: hpAnak, nama_anak: nama, used_at: new Date().toISOString() }).eq("kode", kode.toUpperCase())
-    if(error) { alert(error.message); setLoading(false); return }
+    await supabase.from("kode_akses").update({ status: "TERPAKAI", hp_ortu: hpOrtu, hp_anak: hpAnak, nama_anak: nama, used_at: new Date().toISOString() }).eq("kode", kode.toUpperCase())
     localStorage.setItem("bsj_aktif_code", kode.toUpperCase())
     localStorage.setItem("bsj_durasi", String(durasi))
-    localStorage.setItem("bsj_nama", nama)
-    // FLOW: habis aktivasi masuk ke /soal
     router.push("/soal")
   }
 
