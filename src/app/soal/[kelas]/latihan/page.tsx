@@ -102,13 +102,18 @@ export default function LatihanPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      {/* HEADER FINAL - ADA NAMA BAB + TOMBOL SCORE! */}
-      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow border">
-        <div>
-          <h1 className="font-bold text-sm md:text-base">{kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL</h1>
-          <div className="text-xs text-gray-500 mt-1">Mapel: {kanonikalMapel} | Judul: {getJudulBab()}</div>
+      {/* TOMBOL KEMBALI + HEADER - FIX YANG BOS MAU! */}
+      <div className="mb-4">
+        <a href={`/soal/${kelas}`} className="inline-flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-bold mb-3">
+          ← Kembali ke Dashboard {kelas.toUpperCase()} - 30 BAB
+        </a>
+        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow border">
+          <div>
+            <h1 className="font-bold text-sm md:text-base">{kelas.toUpperCase()} - {kanonikalMapel} BAB {babParam} - {getJudulBab()} - {soal.length} SOAL</h1>
+            <div className="text-xs text-gray-500 mt-1">Mapel: {kanonikalMapel} | Judul: {getJudulBab()}</div>
+          </div>
+          <button onClick={handleKumpulkan} className="text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-bold whitespace-nowrap">Kumpulkan & Lihat Score</button>
         </div>
-        <button onClick={handleKumpulkan} className="text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-bold whitespace-nowrap">Kumpulkan & Lihat Score</button>
       </div>
 
       {hasil?.show && (
@@ -120,7 +125,11 @@ export default function LatihanPage() {
             <div className="bg-white/20 rounded-lg p-3"><div className="text-2xl font-bold">{hasil.salah}</div><div className="text-xs">Salah</div></div>
             <div className="bg-white/20 rounded-lg p-3"><div className="text-2xl font-bold">{hasil.skor}%</div><div className="text-xs">Score</div></div>
           </div>
-          <div className="mt-4 flex gap-2"><a href={`/soal/${kelas}`} className="bg-white text-green-600 px-4 py-2 rounded-full text-xs font-bold">Lihat Total Score {kelas.toUpperCase()}</a><span className="text-xs self-center">{saving ? "Menyimpan..." : "✅ Score tersimpan di Supabase!"}</span></div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href={`/soal/${kelas}`} className="bg-white text-green-600 px-4 py-2 rounded-full text-xs font-bold">← Kembali ke Dashboard Lengkap 30 BAB</a>
+            <a href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(kanonikalMapel)}&bab=${parseInt(babParam) + 1 <= 6 ? parseInt(babParam) + 1 : 1}`} className="bg-yellow-300 text-black px-4 py-2 rounded-full text-xs font-bold">Lanjut BAB {parseInt(babParam) + 1 <= 6 ? parseInt(babParam) + 1 : 1} →</a>
+            <span className="text-xs self-center">{saving ? "Menyimpan..." : "✅ Score tersimpan!"}</span>
+          </div>
         </div>
       )}
 
@@ -139,8 +148,10 @@ export default function LatihanPage() {
           );
         })}
       </div>
-      {soal.length === 0 && <div className="text-center p-8 bg-white rounded-xl">Soal tidak ditemukan</div>}
-      <div className="mt-8 text-center"><button onClick={handleKumpulkan} className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg">Kumpulkan & Hitung Score BAB {babParam} - {getJudulBab()}</button></div>
+      <div className="mt-8 flex justify-between">
+        <a href={`/soal/${kelas}`} className="bg-gray-200 hover:bg-gray-300 px-6 py-3 rounded-full font-bold text-sm">← Dashboard Lengkap 30 BAB</a>
+        <button onClick={handleKumpulkan} className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-full font-bold">Kumpulkan & Hitung Score</button>
+      </div>
     </div>
   );
 }
