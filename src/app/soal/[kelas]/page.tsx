@@ -1,141 +1,166 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-const JUDUL_BAB_LENGKAP: any = {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// JUDUL BAB - DARI FILE BOS YANG ASLI (SD1-SD6)
+const JUDUL_BAB_ALL: any = {
   "bsj-sd1": {
-    "PPKN": { "1": "Lambang Garuda Pancasila", "2": "Aturan di Rumah dan Sekolah", "3": "Toleransi dan Keberagaman", "4": "Gotong Royong", "5": "Mengenal Pancasila", "6": "Bhinneka Tunggal Ika" },
-    "PAI": { "1": "Mengenal Huruf Hijaiyah", "2": "Rukun Iman", "3": "Rukun Islam", "4": "Kisah Nabi Muhammad", "5": "Doa Sehari-hari", "6": "Akhlak Terpuji" },
-    "IPAS": { "1": "Mengenal Bagian Tubuh", "2": "Panca Indera", "3": "Makhluk Hidup di Sekitar", "4": "Benda di Sekitarku", "5": "Cuaca dan Musim", "6": "Lingkungan Rumahku" },
-    "MTK": { "1": "Bilangan 1 Sampai 10", "2": "Penjumlahan Sederhana", "3": "Pengurangan Sederhana", "4": "Mengenal Bentuk", "5": "Pengukuran Panjang", "6": "Bilangan Sampai 20" },
-    "B. INDONESIA": { "1": "Bunyi dan Huruf", "2": "Sapa dan Salam", "3": "Cerita Bergambar", "4": "Kosakata Baru", "5": "Kalimat Sederhana", "6": "Membaca Nyaring" },
+    "PPKN": { "1": "Lambang Garuda Pancasila", "2": "Aturan di Rumah dan Sekolah", "3": "Toleransi", "4": "Gotong Royong", "5": "Mengenal Pancasila", "6": "Bhinneka Tunggal Ika" },
   },
   "bsj-sd2": {
     "PPKN": { "1": "Lambang dan Sila Pancasila", "2": "Aturan dan Tata Tertib", "3": "Hak dan Kewajiban", "4": "Gotong Royong di Sekolah", "5": "Musyawarah", "6": "Keberagaman di Rumah" },
-    "PAI": { "1": "Asmaul Husna", "2": "Shalat Fardhu", "3": "Kisah Nabi Nuh", "4": "Perilaku Jujur", "5": "Doa Sebelum dan Sesudah Belajar", "6": "Kisah Nabi Saleh" },
-    "IPAS": { "1": "Wujud Benda", "2": "Perubahan Benda", "3": "Tumbuhan di Sekitar", "4": "Hewan di Sekitar", "5": "Energi di Sekitar", "6": "Cuaca dan Lingkungan" },
-    "MTK": { "1": "Bilangan Cacah Sampai 100", "2": "Penjumlahan dan Pengurangan", "3": "Perkalian dan Pembagian", "4": "Pengukuran Waktu dan Panjang", "5": "Bangun Datar Sederhana", "6": "Diagram Gambar" },
-    "B. INDONESIA": { "1": "Teks Deskripsi", "2": "Teks Narasi", "3": "Puisi Anak", "4": "Teks Informasi", "5": "Teks Prosedur", "6": "Pidato Singkat" },
+    "B. INDONESIA": { "1": "Bersyukur", "2": "Teman Baru", "3": "Kegiatanku", "4": "Aku Bisa", "5": "Teman Sejati", "6": "Perilaku Terpuji" },
   },
   "bsj-sd3": {
-    "PPKN": { "1": "Lambang Negara dan Pancasila", "2": "Aturan dan Norma", "3": "Hak dan Kewajiban Warga", "4": "Keberagaman Budaya", "5": "Hak dan Kewajiban serta Musyawarah", "6": "Keberagaman Budaya dan Gotong Royong" },
+    "PPKN": { "5": "Hak dan Kewajiban serta Musyawarah", "6": "Keberagaman Budaya dan Gotong Royong" },
     "PAI": { "1": "Nabi dan Rasul", "2": "Shalat Fardhu", "3": "Akhlak Terpuji", "4": "Kisah Teladan Nabi", "5": "Doa Sehari-hari", "6": "Haji dan Ziarah" },
     "IPAS": { "1": "Makhluk Hidup dan Lingkungannya", "2": "Wujud Zat dan Perubahannya", "3": "Energi dan Perubahannya", "4": "Ekosistem", "5": "Manusia dan Lingkungan", "6": "Bumi, Bulan dan Tata Surya" },
     "MTK": { "1": "Bilangan Cacah Sampai 10.000", "2": "Penjumlahan dan Pengurangan", "3": "Perkalian dan Pembagian", "4": "Pecahan Sederhana", "5": "Pengukuran Panjang dan Berat", "6": "Bangun Datar" },
     "B. INDONESIA": { "1": "Kalimat dan Tanda Baca", "2": "Teks Deskripsi", "3": "Teks Narasi", "4": "Puisi Anak", "5": "Teks Informasi", "6": "Pidato Singkat" },
+    "B. INGGRIS": { "1": "Greetings and Introduction", "2": "My Family", "3": "Numbers and Colors", "4": "Animals and Pets", "5": "Daily Activities", "6": "My Hobbies" }
   },
-  "bsj-sd4": {
-    "PPKN": { "1": "Pancasila Sebagai Dasar Negara", "2": "Hak dan Kewajiban", "3": "Keberagaman Budaya", "4": "Kerja Sama dan Gotong Royong", "5": "Musyawarah dan Demokrasi", "6": "NKRI dan Semangat Kebangsaan" },
-    "PAI": { "1": "Surah At-Tin dan Al-Maun", "2": "Iman Kepada Malaikat", "3": "Kisah Nabi Muhammad di Madinah", "4": "Zakat", "5": "Perilaku Terpuji", "6": "Kisah Sahabat Nabi" },
-    "IPAS": { "1": "Gaya di Sekitar Kita", "2": "Energi dan Transformasi", "3": "Bagian Tumbuhan dan Fungsinya", "4": "Keragaman Budaya Indonesia", "5": "Sistem Tata Surya", "6": "Kenampakan Alam Indonesia" },
-    "MTK": { "1": "Bilangan Cacah Besar", "2": "Pecahan", "3": "Pola Bilangan", "4": "Pengukuran Sudut dan Luas", "5": "Bangun Datar dan Volume", "6": "Statistika Sederhana" },
-    "B. INDONESIA": { "1": "Teks Narasi dan Informasi", "2": "Teks Prosedur", "3": "Puisi dan Pantun", "4": "Teks Deskripsi Objektif", "5": "Teks Persuasi", "6": "Pidato dan Wawancara" },
-  },
-  "bsj-sd5": {
-    "PPKN": { "1": "Pancasila dan Nilai-nilainya", "2": "Norma dan Aturan", "3": "Keberagaman Sosial Budaya", "4": "Gotong Royong dan Kerja Sama", "5": "Musyawarah Mufakat", "6": "Cinta Tanah Air" },
-    "PAI": { "1": "Surah Al-Maidah dan At-Tahrim", "2": "Iman Kepada Rasul", "3": "Puasa Ramadan", "4": "Kisah Nabi Daud dan Sulaiman", "5": "Akhlak Terhadap Sesama", "6": "Khalifah dan Walisongo" },
-    "IPAS": { "1": "Sistem Pernapasan Manusia", "2": "Sistem Pencernaan Manusia", "3": "Zat dan Perubahannya", "4": "Gaya dan Gerak", "5": "Ekosistem dan Rantai Makanan", "6": "Pelestarian Lingkungan" },
-    "MTK": { "1": "Bilangan Cacah Sampai 100.000", "2": "Pecahan dan Desimal", "3": "Perbandingan dan Skala", "4": "Bangun Datar dan Ruang", "5": "Pengumpulan Data", "6": "Keliling dan Luas" },
-    "B. INDONESIA": { "1": "Ide Pokok dan Gagasan Utama", "2": "Teks Eksplanasi", "3": "Puisi dan Syair", "4": "Teks Persuasi dan Iklan", "5": "Pidato dan Diskusi", "6": "Cerita Rakyat dan Drama" },
-  },
-  "bsj-sd6": {
-    "PPKN": { "1": "Pancasila Sebagai Ideologi", "2": "Hak, Kewajiban dan Tanggung Jawab", "3": "Persatuan dan Kesatuan", "4": "Kerja Sama dalam Keberagaman", "5": "Demokrasi dan Musyawarah", "6": "Bela Negara" },
-    "PAI": { "1": "Surah Al-Qalam dan Al-Hujurat", "2": "Iman Kepada Hari Akhir", "3": "Haji dan Umrah", "4": "Kisah Nabi Ayyub dan Yunus", "5": "Toleransi dan Kerukunan", "6": "Kisah Khulafaur Rasyidin" },
-    "IPAS": { "1": "Rangka dan Sistem Gerak Manusia", "2": "Siklus Air dan Cuaca", "3": "Listrik dan Magnet", "4": "Perubahan Wujud Zat", "5": "Ekosistem dan Pelestarian", "6": "Bumi dan Antariksa" },
-    "MTK": { "1": "Bilangan Bulat dan Pecahan", "2": "Operasi Hitung Campuran", "3": "Bangun Ruang", "4": "Statistika dan Diagram", "5": "Perbandingan dan Skala Lanjutan", "6": "Koordinat dan Denah" },
-    "B. INDONESIA": { "1": "Teks Laporan Hasil Observasi", "2": "Teks Eksplanasi Fenomena", "3": "Puisi dan Teks Pidato", "4": "Teks Formulir dan Surat", "5": "Cerpen dan Drama", "6": "Teks Argumentasi" },
-  },
+  "bsj-sd4": { "PPKN": { "1": "Pancasila Sebagai Dasar Negara", "2": "Hak dan Kewajiban", "3": "Keberagaman Budaya", "4": "Kerja Sama dan Gotong Royong", "5": "Musyawarah dan Demokrasi", "6": "NKRI dan Semangat Kebangsaan" } },
+  "bsj-sd5": { "PPKN": { "1": "Pancasila dan Nilai-nilainya", "2": "Norma dan Aturan", "3": "Keberagaman Sosial Budaya", "4": "Gotong Royong dan Kerja Sama", "5": "Musyawarah Mufakat", "6": "Cinta Tanah Air" } },
+  "bsj-sd6": { "PPKN": { "1": "Pancasila Sebagai Ideologi", "2": "Hak, Kewajiban dan Tanggung Jawab", "3": "Persatuan dan Kesatuan", "4": "Kerja Sama dalam Keberagaman", "5": "Demokrasi dan Musyawarah", "6": "Bela Negara" } },
 };
 
-const MAPEL_STYLE: any = {
-  "PPKN": { bg: "bg-blue-50", border: "border-blue-300", headerBg: "bg-blue-100", icon: "/icons/ppkn.png", color: "Pastel Biru" },
-  "B. INDONESIA": { bg: "bg-red-50", border: "border-red-300", headerBg: "bg-red-100", icon: "/icons/bindo.png", color: "Pastel Merah" },
-  "MTK": { bg: "bg-green-50", border: "border-green-300", headerBg: "bg-green-100", icon: "/icons/mtk.png", color: "Pastel Hijau" },
-  "IPAS": { bg: "bg-yellow-50", border: "border-yellow-300", headerBg: "bg-yellow-100", icon: "/icons/ipas.png", color: "Pastel Kuning" },
-  "PAI": { bg: "bg-amber-50", border: "border-amber-300", headerBg: "bg-amber-100", icon: "/icons/pai.png", color: "Pastel Emas" },
+const MAPEL_LIST = ["PPKN", "B. INDONESIA", "MTK", "IPAS", "PAI", "B. INGGRIS"];
+const WARNA: any = {
+  "PPKN": { bg: "bg-blue-50", header: "bg-blue-100 border-blue-200", icon: "🦅", pastel: "Pastel Biru" },
+  "B. INDONESIA": { bg: "bg-red-50", header: "bg-red-100 border-red-200", icon: "📚", pastel: "Pastel Merah" },
+  "MTK": { bg: "bg-green-50", header: "bg-green-100 border-green-200", icon: "🔢", pastel: "Pastel Hijau" },
+  "IPAS": { bg: "bg-yellow-50", header: "bg-yellow-100 border-yellow-200", icon: "🔬", pastel: "Pastel Kuning" },
+  "PAI": { bg: "bg-emerald-50", header: "bg-emerald-100 border-emerald-200", icon: "🕌", pastel: "Pastel Hijau" },
+  "B. INGGRIS": { bg: "bg-purple-50", header: "bg-purple-100 border-purple-200", icon: "🇬🇧", pastel: "Pastel Ungu" },
 };
 
-export default function KelasDashboardLengkap() {
+type Hasil = { id: string; kode_akses: string; mapel: string; bab: number; benar: number; salah: number; score: number; created_at: string; };
+
+export default function DashboardKelasPage() {
   const params = useParams();
-  const kelas = (params.kelas as string)?.toLowerCase() || "";
-  const [skorData, setSkorData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const kelas = (params.kelas as string)?.toLowerCase() || "bsj-sd2";
+  const [kode, setKode] = useState("");
+  const [hasil, setHasil] = useState<Hasil[]>([]);
+  const [showPantau, setShowPantau] = useState(false);
 
   useEffect(() => {
-    async function fetchSkor() {
-      setLoading(true);
-      const { data } = await supabase.from("skor_bab").select("*").eq("kelas", kelas).order("mapel", { ascending: true }).order("bab_ke", { ascending: true });
-      setSkorData(data || []);
-      setLoading(false);
-    }
-    fetchSkor();
+    const k = localStorage.getItem("bsj_kode_aktif") || "BSJ-SD1-W4CU";
+    setKode(k);
+    supabase.from("hasil_latihan").select("*").eq("kode_akses", k).eq("kelas", kelas).order("created_at", { ascending: false }).then(({ data }) => {
+      if (data) setHasil(data as any);
+      else {
+        // fallback kalau kolom kelas belum ada, ambil semua kode
+        supabase.from("hasil_latihan").select("*").eq("kode_akses", k).order("created_at", { ascending: false }).then(({ data: d2 }) => { if (d2) setHasil(d2 as any); });
+      }
+    });
   }, [kelas]);
 
-  if (loading) return <div className="p-8 text-center">Loading Dashboard {kelas}...</div>;
+  const judulBabAllKelas = JUDUL_BAB_ALL[kelas] || JUDUL_BAB_ALL["bsj-sd2"];
+  const totalBAB = Object.values(judulBabAllKelas).reduce((acc: number, m: any) => acc + Object.keys(m).length, 0) || 30;
+  const selesai = hasil.length;
+  const rata = selesai ? Math.round(hasil.reduce((a, b) => a + b.score, 0) / selesai) : 0;
+  const totalBenar = hasil.reduce((a, b) => a + b.benar, 0);
+  const totalSoal = hasil.reduce((a, b) => a + b.benar + b.salah, 0);
 
-  const totalBAB = 30;
-  const selesai = skorData.length;
-  const totalScore = selesai > 0 ? Math.round(skorData.reduce((a, b) => a + b.skor, 0) / selesai) : 0;
-  const totalBenar = skorData.reduce((a, b) => a + b.benar, 0);
-  const progress = Math.round((selesai / totalBAB) * 100);
-  const mapels = ["PPKN", "B. INDONESIA", "MTK", "IPAS", "PAI"];
-  const getSkorBab = (mapel: string, bab: number) => skorData.find((s) => s.mapel === mapel && s.bab_ke === bab);
+  const getJudul = (mapel: string, bab: number) => {
+    return JUDUL_BAB_ALL[kelas]?.[mapel]?.[String(bab)] || JUDUL_BAB_ALL["bsj-sd2"]?.[mapel]?.[String(bab)] || `BAB ${bab}`;
+  };
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">{kelas.toUpperCase()} - Dashboard Score Lengkap 30 BAB</h1>
+    <div className="max-w-4xl mx-auto p-4 bg-[#fffcf5] min-h-screen">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="font-bold text-base md:text-lg">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB</h1>
+        <div className="flex gap-2 items-center">
+          <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode}</span>
+          <button onClick={() => setShowPantau(!showPantau)} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold hover:bg-gray-800">
+            📊 Pantauan Orang Tua {hasil.length > 0 ? `(${hasil.length})` : ""}
+          </button>
+        </div>
+      </div>
 
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-2xl mb-6 shadow-xl">
+      {/* PANTAUAN - SATU FLOW DALAM DASHBOARD YANG SAMA (BUKAN CABANG) */}
+      {showPantau && (
+        <div className="border rounded-xl bg-white p-4 mb-5 shadow-sm">
+          <h2 className="font-bold text-sm mb-3">📊 Pantauan Orang Tua - {kode} - {kelas.toUpperCase()}</h2>
+          {hasil.length === 0 ? (
+            <div className="text-sm text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan untuk kelas ini</div>
+          ) : (
+            <>
+              <div className="grid grid-cols-4 gap-2 mb-3 text-center">
+                <div className="bg-blue-50 p-2 rounded-lg"><div className="font-bold text-lg">{hasil.length}</div><div className="text-[10px]">Total Latihan</div></div>
+                <div className="bg-green-50 p-2 rounded-lg"><div className="font-bold text-lg">{rata}%</div><div className="text-[10px]">Rata-rata</div></div>
+                <div className="bg-yellow-50 p-2 rounded-lg"><div className="font-bold text-lg">{hasil.filter(h => h.score >= 70).length}</div><div className="text-[10px]">Tuntas</div></div>
+                <div className="bg-red-50 p-2 rounded-lg"><div className="font-bold text-lg">{hasil.filter(h => h.score < 70).length}</div><div className="text-[10px]">Perlu Ulang</div></div>
+              </div>
+              <div className="border rounded-lg overflow-hidden max-h-[300px] overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0"><tr><th className="p-2 text-left">Waktu</th><th className="p-2 text-left">Mapel BAB</th><th className="p-2 text-center">Benar</th><th className="p-2 text-center">Score</th></tr></thead>
+                  <tbody>{hasil.map(h => (
+                    <tr key={h.id} className="border-t hover:bg-gray-50"><td className="p-2">{new Date(h.created_at).toLocaleString("id-ID")}</td><td className="p-2"><b>{h.mapel} BAB {h.bab}</b><br /><span className="text-[10px] text-gray-500">{getJudul(h.mapel, h.bab)}</span></td><td className="p-2 text-center text-green-600 font-bold">{h.benar}</td><td className="p-2 text-center"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${h.score >= 70 ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>{h.score}%</span></td></tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* TOTAL SCORE - PERSIS KAYAK FOTO SD2 */}
+      <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white p-5 mb-6 shadow-lg">
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm opacity-80">Total Score Kelas</div>
-            <div className="text-5xl font-bold">{totalScore}%</div>
-            <div className="text-sm mt-2">{selesai} / {totalBAB} BAB selesai ({progress}%) • Benar {totalBenar} / {selesai * 30}</div>
+            <div className="text-xs opacity-80">Total Score Kelas</div>
+            <div className="text-4xl font-bold">{rata}%</div>
+            <div className="text-xs mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai ({totalBAB ? Math.round(selesai / totalBAB * 100) : 0}%) • Benar {totalBenar} / {totalSoal || 0}</div>
           </div>
-          <div className="text-center"><div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-2xl font-bold">{progress}%</div><div className="text-xs mt-1">Progress</div></div>
+          <div className="text-center">
+            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div>
+            <div className="text-[10px] mt-1 opacity-80">Progress</div>
+          </div>
         </div>
-        <div className="w-full bg-white/20 rounded-full h-3 mt-4"><div className="bg-white h-3 rounded-full" style={{ width: `${progress}%` }}></div></div>
+        <div className="w-full bg-white/20 h-2 rounded-full mt-4"><div className="bg-white h-2 rounded-full transition-all" style={{ width: `${totalBAB ? (selesai / totalBAB) * 100 : 0}%` }} /></div>
       </div>
 
-      <div className="space-y-6">
-        {mapels.map((mapel) => {
-          const style = MAPEL_STYLE[mapel];
-          const skorMapel = skorData.filter((s) => s.mapel === mapel);
-          const selesaiMapel = skorMapel.length;
-          const rataMapel = selesaiMapel > 0 ? Math.round(skorMapel.reduce((a, b) => a + b.skor, 0) / selesaiMapel) : 0;
-          return (
-            <div key={mapel} className={`${style.bg} ${style.border} border-2 rounded-xl shadow p-4`}>
-              <div className={`flex justify-between items-center mb-3 ${style.headerBg} p-3 rounded-lg`}>
-                <h2 className="font-bold flex items-center gap-3">
-                  <img src={style.icon} alt={mapel} className="w-12 h-12 object-contain drop-shadow" />
-                  <span className="text-base">{mapel}</span>
-                  <span className="text-xs font-normal text-gray-600 ml-2">{selesaiMapel}/6 BAB - Rata {rataMapel}% - {style.color}</span>
-                </h2>
-                <div className="w-24 bg-white rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(selesaiMapel / 6) * 100}%` }}></div></div>
+      {/* LIST MAPEL - PERSIS KAYAK FOTO SD2 */}
+      {Object.keys(judulBabAllKelas).map((mapel) => {
+        const babs = judulBabAllKelas[mapel];
+        const totalMapel = Object.keys(babs).length;
+        const doneMapel = hasil.filter(h => h.mapel.toUpperCase() === mapel.toUpperCase() || h.mapel === mapel).length;
+        const rataMapel = doneMapel ? Math.round(hasil.filter(h => h.mapel.toUpperCase() === mapel.toUpperCase() || h.mapel === mapel).reduce((a, b) => a + b.score, 0) / doneMapel) : 0;
+        const w = WARNA[mapel] || { bg: "bg-gray-50", header: "bg-gray-100 border-gray-200", icon: "📘", pastel: "Pastel Abu" };
+        return (
+          <div key={mapel} className={`border rounded-xl p-3 mb-5 ${w.bg}`}>
+            <div className={`flex justify-between items-center ${w.header} p-3 rounded-lg mb-3 border`}>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{w.icon}</span>
+                <span className="font-bold text-sm">{mapel}</span>
+                <span className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {[1, 2, 3, 4, 5, 6].map((bab) => {
-                  const judul = JUDUL_BAB_LENGKAP[kelas]?.[mapel]?.[bab.toString()] || `BAB ${bab}`;
-                  const skor = getSkorBab(mapel, bab);
-                  return (
-                    <a key={bab} href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(mapel)}&bab=${bab}`} className={`border rounded-lg p-3 hover:shadow-md transition block bg-white ${skor ? "border-green-400" : "border-gray-200"}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="text-xs text-gray-500">BAB {bab}</div>
-                          <div className="font-bold text-sm">{judul}</div>
-                          <div className="text-xs mt-1">{skor ? `✅ Score ${skor.skor}% (${skor.benar}/30)` : "Belum dikerjakan"}</div>
-                        </div>
-                        <div className={`text-xs px-2 py-1 rounded-full font-bold ${skor ? (skor.skor >= 80 ? "bg-green-500 text-white" : skor.skor >= 60 ? "bg-yellow-500 text-white" : "bg-red-500 text-white") : "bg-gray-200 text-gray-600"}`}>{skor ? `${skor.skor}%` : "0%"}</div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
+              <div className="w-24 h-1.5 bg-white/70 rounded-full"><div className="bg-black/20 h-1.5 rounded-full" style={{ width: `${(doneMapel / totalMapel) * 100}%` }} /></div></div>
             </div>
-          );
-        })}
-      </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {Object.keys(babs).map((babStr) => {
+                const bab = parseInt(babStr);
+                const judul = getJudul(mapel, bab);
+                const skor = hasil.find(h => (h.mapel.toUpperCase() === mapel.toUpperCase() || h.mapel === mapel) && h.bab === bab);
+                return (
+                  <a key={`${mapel}-${bab}`} href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(mapel)}&bab=${bab}`} className="bg-white border rounded-lg p-3 hover:border-blue-400 hover:shadow-sm flex justify-between items-start transition">
+                    <div className="pr-2"><div className="text-[10px] text-gray-500">BAB {bab}</div><div className="font-bold text-xs leading-tight line-clamp-2">{judul}</div><div className="text-[10px] text-gray-500 mt-1">{skor ? `Benar ${skor.benar} • ${new Date(skor.created_at).toLocaleDateString("id-ID")}` : "Belum dikerjakan"}</div></div>
+                    <div className={`text-[10px] px-2 py-1 rounded-full font-bold shrink-0 ${skor ? (skor.score >= 70 ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700") : "bg-gray-100 text-gray-600"}`}>{skor ? `${skor.score}%` : "0%"}</div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
