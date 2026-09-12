@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// DATA FIX SESUAI KESEPAKATAN - 30 BAB - 5 MAPEL - TIDAK NAMBAH BAB
+// DATA FIX 30 BAB SESUAI TABEL KESEPAKATAN BOS - TIDAK NAMBAH
 const JUDUL_BAB_ALL: any = {
   "bsj-sd1": {
     "PAI & Budi Pekerti": { "1": "Rukun Iman", "2": "Bersuci & Wudhu", "3": "Mengenal Huruf Hijaiyah", "4": "Doa Sehari-hari", "5": "Kisah Nabi", "6": "Akhlak Terpuji" },
@@ -54,21 +54,18 @@ const JUDUL_BAB_ALL: any = {
   }
 };
 
-// IKON 3D DARI PUBLIC - SESUAI NAMA MAPEL
+// IKON 3D DARI public/icons/ - SESUAI FOTO BOS
 const ICON_3D: any = {
-  "PAI & Budi Pekerti": "/pai.png",
-  "PAI": "/pai.png",
-  "Bahasa Indonesia": "/bahasa-indonesia.png",
-  "Matematika": "/matematika.png",
-  "PPKN": "/ppkn.png",
-  "IPAS": "/ipas.png",
-  "B. INDONESIA": "/bahasa-indonesia.png",
-  "MTK": "/matematika.png"
+  "PAI & Budi Pekerti": "/icons/pai.png",
+  "Bahasa Indonesia": "/icons/bindo.png",
+  "Matematika": "/icons/mtk.png",
+  "PPKN": "/icons/ppkn.png",
+  "IPAS": "/icons/ipas.png"
 };
 
 const WARNA: any = {
   "PAI & Budi Pekerti": { bg: "bg-emerald-50", header: "bg-emerald-100", pastel: "Pastel Hijau Tua" },
-  "Bahasa Indonesia": { bg: "bg-red-50", header: "bg-red-100", pastel: "Pastel Merah" },
+  "Bahasa Indonesia": { bg: "bg-orange-50", header: "bg-orange-100", pastel: "Pastel Orange" },
   "Matematika": { bg: "bg-green-50", header: "bg-green-100", pastel: "Pastel Hijau" },
   "PPKN": { bg: "bg-blue-50", header: "bg-blue-100", pastel: "Pastel Biru" },
   "IPAS": { bg: "bg-yellow-50", header: "bg-yellow-100", pastel: "Pastel Kuning" }
@@ -107,8 +104,8 @@ export default function DashboardKelasPage() {
   function normalizeMapel(s: string) {
     const low = s.toLowerCase();
     if (low.includes("pai") || low.includes("budi")) return "PAI & Budi Pekerti";
-    if (low.includes("indonesia") || low.includes("b. indonesia")) return "Bahasa Indonesia";
-    if (low.includes("matematika") || low === "mtk") return "Matematika";
+    if (low.includes("indonesia") || low.includes("bindo") || low.includes("b. indonesia")) return "Bahasa Indonesia";
+    if (low.includes("matematika") || low === "mtk" || low.includes("mtk")) return "Matematika";
     if (low.includes("ppkn") || low.includes("pancasila")) return "PPKN";
     if (low.includes("ipas")) return "IPAS";
     return s;
@@ -125,7 +122,7 @@ export default function DashboardKelasPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 bg-[#fffcf5] min-h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="font-bold text-base">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB</h1>
+        <h1 className="font-bold text-base">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB - 5 Mapel</h1>
         <div className="flex gap-2 items-center">
           <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode}</span>
           <button onClick={function () { setShowPantau(!showPantau); }} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold">
@@ -172,13 +169,13 @@ export default function DashboardKelasPage() {
         hasil.filter(function (h) { return normalizeMapel(h.mapel) === mapel; }).forEach(function (h) { scoreMapel += h.score; });
         const rataMapel = doneMapel ? Math.round(scoreMapel / doneMapel) : 0;
         const w = WARNA[mapel] || { bg: "bg-gray-50", header: "bg-gray-100", pastel: "Pastel Abu" };
-        const iconPath = ICON_3D[mapel] || "/book.png";
+        const iconPath = ICON_3D[mapel] || "/icons/book.png";
 
         return (
           <div key={mapel} className={"border rounded-xl p-3 mb-5 " + w.bg}>
             <div className={"flex justify-between items-center p-3 rounded-lg mb-3 border " + w.header}>
               <div className="flex items-center gap-3">
-                <img src={iconPath} alt={mapel} className="w-8 h-8 object-contain" onError={function (e) { (e.target as any).style.display = "none"; }} />
+                <img src={iconPath} alt={mapel} className="w-10 h-10 object-contain drop-shadow-sm" />
                 <div>
                   <div className="font-bold text-sm">{mapel}</div>
                   <div className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div>
