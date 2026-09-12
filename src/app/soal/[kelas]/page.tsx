@@ -8,51 +8,52 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// 30 BAB FIX - SESUAI TABEL KESEPAKATAN - 5 MAPEL
+// 30 BAB FIX - FINAL KURMER 2025 - 180 BAB VALID FASE A/B/C - UPDATE 12/09/2026
 const JUDUL_BAB_ALL: any = {
   "bsj-sd1": {
     "PAI & Budi Pekerti": { "1": "Rukun Iman", "2": "Bersuci & Wudhu", "3": "Mengenal Huruf Hijaiyah", "4": "Doa Sehari-hari", "5": "Kisah Nabi", "6": "Akhlak Terpuji" },
     "Bahasa Indonesia": { "1": "Bunyi dan Huruf", "2": "Sapa dan Salam", "3": "Cerita Bergambar", "4": "Kosakata Baru", "5": "Kalimat Sederhana", "6": "Membaca Nyaring" },
     "Matematika": { "1": "Bilangan 1-10", "2": "Penjumlahan & Pengurangan", "3": "Bangun Datar", "4": "Pengukuran Panjang", "5": "Waktu & Jam", "6": "Soal Cerita" },
     "PPKN": { "1": "Aturan di Rumah", "2": "Aturan di Sekolah", "3": "Simbol Pancasila", "4": "Hidup Rukun", "5": "Toleransi", "6": "Gotong Royong" },
-    "IPAS": { "1": "Bagian Tubuh", "2": "Panca Indera", "3": "Makhluk Hidup", "4": "Benda di Sekitar", "5": "Cuaca", "6": "Lingkungan Bersih" }
+    "IPAS": { "1": "Bagian Tubuh", "2": "Panca Indera", "3": "Makhluk Hidup", "4": "Benda di Sekitar", "5": "Cuaca", "6": "Lingkungan Bersih" },
   },
   "bsj-sd2": {
     "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
     "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
     "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
     "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
-    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" },
   },
   "bsj-sd3": {
-    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
-    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
-    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
-    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
-    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+    "PAI & Budi Pekerti": { "1": "Surah At-Tin & Al-Maun", "2": "Sifat Wajib Rasul", "3": "Sholat Jumat & Jenazah", "4": "Kisah Nabi Ibrahim", "5": "Zakat Fitrah", "6": "Akhlak Terpuji di Sekolah" },
+    "Bahasa Indonesia": { "1": "Gagasan Pokok", "2": "Teks Petunjuk", "3": "Surat Pribadi", "4": "Teks Informasi", "5": "Pantun", "6": "Meringkas Teks" },
+    "Matematika": { "1": "Bilangan 1-1000", "2": "Pecahan Sederhana", "3": "Garis & Sudut", "4": "Keliling Bangun Datar", "5": "Pengukuran Waktu & Berat", "6": "Diagram & Data" },
+    "PPKN": { "1": "Makna Sila Pancasila", "2": "Aturan & Norma", "3": "Keberagaman Suku & Budaya", "4": "Kerja Sama di Lingkungan", "5": "Hak & Kewajiban di Sekolah", "6": "Semangat Bhinneka Tunggal Ika" },
+    "IPAS": { "1": "Ciri Makhluk Hidup", "2": "Wujud Zat", "3": "Ekosistem Sederhana", "4": "Gaya & Gerak", "5": "Siklus Hidup", "6": "Pelestarian Lingkungan" },
   },
   "bsj-sd4": {
-    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
-    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
-    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
-    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
-    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+    "PAI & Budi Pekerti": { "1": "Surah Al-Zalzalah", "2": "Iman kepada Malaikat", "3": "Puasa Wajib", "4": "Kisah Nabi Ayyub", "5": "Toleransi", "6": "Perilaku Hemat" },
+    "Bahasa Indonesia": { "1": "Teks Deskripsi", "2": "Teks Narasi", "3": "Teks Prosedur", "4": "Puisi & Pantun", "5": "Pidato", "6": "Cerita Rakyat" },
+    "Matematika": { "1": "Bilangan Cacah Besar", "2": "Pecahan Campuran", "3": "KPK & FPB", "4": "Bangun Datar & Simetri", "5": "Pengukuran Sudut & Luas", "6": "Statistika Sederhana" },
+    "PPKN": { "1": "Pancasila sebagai Dasar Negara", "2": "UUD 1945", "3": "Keberagaman Budaya Nasional", "4": "Kerja Sama ASEAN", "5": "Musyawarah Mufakat", "6": "Cinta Tanah Air & NKRI" },
+    "IPAS": { "1": "Gaya di Sekitar", "2": "Energi & Perubahan", "3": "Bagian Tumbuhan & Fungsi", "4": "Keragaman Budaya Indonesia", "5": "Tata Surya", "6": "Kenampakan Alam" },
   },
   "bsj-sd5": {
-    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
-    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
-    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
-    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
-    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+    "PAI & Budi Pekerti": { "1": "Surah Al-Maidah", "2": "Iman kepada Rasul", "3": "Haji & Umrah", "4": "Kisah Khulafaur Rasyidin", "5": "Akhlak terhadap Lingkungan", "6": "Kerukunan Umat Beragama" },
+    "Bahasa Indonesia": { "1": "Ide Pokok & Gagasan", "2": "Teks Eksplanasi", "3": "Teks Pidato", "4": "Teks Formulir & Surat", "5": "Cerpen", "6": "Pantun & Syair" },
+    "Matematika": { "1": "Bilangan Cacah hingga 100.000", "2": "Pecahan & Desimal", "3": "Perbandingan & Skala", "4": "Bangun Ruang", "5": "Volume Kubus & Balok", "6": "Penyajian Data" },
+    "PPKN": { "1": "Nilai Pancasila", "2": "Norma & Aturan", "3": "Keberagaman Sosial Budaya", "4": "Gotong Royong Lintas Daerah", "5": "Demokrasi", "6": "Cinta Tanah Air & Patriotisme" },
+    "IPAS": { "1": "Sistem Pernapasan", "2": "Sistem Pencernaan", "3": "Zat & Perubahannya", "4": "Rantai Makanan", "5": "Siklus Air", "6": "Pemanasan Global" },
   },
   "bsj-sd6": {
-    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
-    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
-    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
-    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
-    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
-  }
+    "PAI & Budi Pekerti": { "1": "Surah Al-Qalam & Al-Hujurat", "2": "Iman kepada Hari Akhir", "3": "Kisah Teladan Sahabat Nabi", "4": "Akhlak Terpuji & Tercela", "5": "Khalifah & Walisongo", "6": "Toleransi & Kerukunan" },
+    "Bahasa Indonesia": { "1": "Teks Laporan Observasi", "2": "Teks Eksplanasi Fenomena", "3": "Teks Pidato Persuasif", "4": "Teks Argumentasi", "5": "Cerita Inspiratif", "6": "Drama" },
+    "Matematika": { "1": "Bilangan Bulat", "2": "Operasi Hitung Campuran", "3": "Lingkaran", "4": "Bangun Ruang Lanjutan", "5": "Statistika & Diagram", "6": "Koordinat & Denah" },
+    "PPKN": { "1": "Pancasila sebagai Ideologi", "2": "UUD 1945 & Bhinneka", "3": "Persatuan & Kesatuan", "4": "Kerja Sama Internasional", "5": "Demokrasi & Musyawarah", "6": "Bela Negara" },
+    "IPAS": { "1": "Rangka & Sistem Gerak", "2": "Listrik & Magnet", "3": "Siklus Air & Cuaca", "4": "Ekosistem & Pelestarian", "5": "Bumi & Antariksa", "6": "Perubahan Iklim" },
+  },
 };
+
 
 const ICON_3D: any = {
   "PAI & Budi Pekerti": "/icons/pai.png",
