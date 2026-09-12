@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
@@ -8,7 +8,10 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function KodePage() {
+// Biar gak di-prerender Vercel
+export const dynamic = 'force-dynamic';
+
+function KodeForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const codeFromUrl = searchParams.get("code") || "";
@@ -32,7 +35,6 @@ export default function KodePage() {
     if (k.includes("SD4")) return "bsj-sd4";
     if (k.includes("SD5")) return "bsj-sd5";
     if (k.includes("SD6")) return "bsj-sd6";
-    // default fallback
     return "bsj-sd1";
   }
 
@@ -47,7 +49,6 @@ export default function KodePage() {
     const kodeFinal = kode.trim().toUpperCase();
     const kelasAktif = getKelasFromKode(kodeFinal);
 
-    // 1. Validasi ke Supabase (optional - kalau tabel ada)
     try {
       await supabase.from("voucher_aktif").upsert({
         kode_akses: kodeFinal,
@@ -59,11 +60,10 @@ export default function KodePage() {
         updated_at: new Date().toISOString()
       }, { onConflict: 'kode_akses' });
     } catch (e) {
-      // abaikan kalau tabel belum ada, tetap lanjut localStorage
       console.log("supabase skip", e);
     }
 
-    // 2. KUNCI: Simpan ke localStorage untuk dibaca dashboard /soal/[kelas]
+    // Simpan untuk dibaca dashboard /soal/[kelas]
     localStorage.setItem("bsj_kode_aktif", kodeFinal);
     localStorage.setItem("bsj_kelas_aktif", kelasAktif);
     localStorage.setItem("bsj_hp_ortu", hpOrtu.trim());
@@ -73,7 +73,6 @@ export default function KodePage() {
 
     setMsg(`Berhasil! Masuk ke ${kelasAktif.toUpperCase()}...`);
     
-    // 3. Redirect sesuai kode vouchernya
     setTimeout(() => {
       window.location.href = `/soal/${kelasAktif}`;
     }, 800);
@@ -87,28 +86,28 @@ export default function KodePage() {
         <div className="text-center mb-6">
           <div className="inline-block border border-yellow-500 text-yellow-500 text-[10px] px-3 py-1 rounded-full tracking-widest">PREMIUM 30 HARI</div>
           <h1 className="text-yellow-500 font-bold mt-4 text-sm">AKTIFKAN KARTU PREMIUM</h1>
-          <p className="text-white/50 text-[10px] mt-1">Aktif 30 hari - kode:</p>
+          <p className="text-white/50 text-[10px] mt-1">Aktif 30 hari - kode: {kode || "BSJ-SD1-XXXX"}</p>
         </div>
-
         <div className="space-y-3">
           <input value={kode} onChange={(e)=>setKode(e.target.value)} placeholder="BSJ-SD1-XXXX" className="w-full bg-black border border-yellow-500/50 rounded-lg p-3 text-sm text-yellow-500 placeholder:text-yellow-500/30 uppercase font-mono" />
           <input value={hpOrtu} onChange={(e)=>setHpOrtu(e.target.value)} placeholder="HP ORANG TUA" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
           <input value={hpAnak} onChange={(e)=>setHpAnak(e.target.value)} placeholder="HP ANAK (YANG BELAJAR)" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
           <input value={namaAnak} onChange={(e)=>setNamaAnak(e.target.value)} placeholder="NAMA ANAK" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
-
           {msg && <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs p-3 rounded-lg text-center">{msg}</div>}
-
           <button onClick={handleAktifkan} disabled={loading} className="w-full bg-yellow-500 text-black rounded-lg py-3 text-sm font-bold hover:bg-yellow-400 disabled:opacity-50">
             {loading ? "Memproses..." : "🚀 AKTIFKAN 30 HARI"}
           </button>
-
           <p className="text-white/30 text-[10px] text-center mt-2">Langsung masuk kelas {kelasPreview.toUpperCase()} - tanpa pilih kelas lagi</p>
-          
-          <div className="text-[9px] text-white/20 text-center leading-tight pt-3 border-t border-white/10">
-            1 kode = 1 kelas | Beda kode bisa masuk kelas sama | Score per kode tidak tertukar
-          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function KodePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-yellow-500 text-sm">Loading...</div>}>
+      <KodeForm />
+    </Suspense>
   );
 }
