@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// DATA FIX 30 BAB SESUAI TABEL KESEPAKATAN BOS - TIDAK NAMBAH
+// 30 BAB FIX - SESUAI TABEL KESEPAKATAN - 5 MAPEL
 const JUDUL_BAB_ALL: any = {
   "bsj-sd1": {
     "PAI & Budi Pekerti": { "1": "Rukun Iman", "2": "Bersuci & Wudhu", "3": "Mengenal Huruf Hijaiyah", "4": "Doa Sehari-hari", "5": "Kisah Nabi", "6": "Akhlak Terpuji" },
@@ -54,7 +54,6 @@ const JUDUL_BAB_ALL: any = {
   }
 };
 
-// IKON 3D DARI public/icons/ - SESUAI FOTO BOS
 const ICON_3D: any = {
   "PAI & Budi Pekerti": "/icons/pai.png",
   "Bahasa Indonesia": "/icons/bindo.png",
@@ -71,7 +70,7 @@ const WARNA: any = {
   "IPAS": { bg: "bg-yellow-50", header: "bg-yellow-100", pastel: "Pastel Kuning" }
 };
 
-type Hasil = { id: string; kode_akses: string; mapel: string; bab: number; benar: number; salah: number; score: number; created_at: string; };
+type Hasil = { id: string; kode_akses: string; kelas: string; mapel: string; bab: number; benar: number; salah: number; score: number; created_at: string; };
 
 export default function DashboardKelasPage() {
   const params = useParams();
@@ -81,12 +80,14 @@ export default function DashboardKelasPage() {
   const [showPantau, setShowPantau] = useState(false);
 
   useEffect(function () {
-    const k = localStorage.getItem("bsj_kode_aktif") || "BSJ-SD1-W4CU";
+    const k = localStorage.getItem("bsj_kode_aktif") || "";
     setKode(k);
-    supabase.from("hasil_latihan").select("*").eq("kode_akses", k).order("created_at", { ascending: false }).then(function (res) {
+    if (!k) return;
+    // FIX a,b,c: 1 voucher hanya untuk 1 kelas + beda voucher bisa masuk kelas sama tapi score gak ketuker
+    supabase.from("hasil_latihan").select("*").eq("kode_akses", k).eq("kelas", kelas).order("created_at", { ascending: false }).then(function (res) {
       if (res.data) setHasil(res.data as any);
     });
-  }, []);
+  }, [kelas]);
 
   const judulBabKelas = JUDUL_BAB_ALL[kelas] || JUDUL_BAB_ALL["bsj-sd1"];
   let totalBAB = 0;
@@ -104,19 +105,11 @@ export default function DashboardKelasPage() {
   function normalizeMapel(s: string) {
     const low = s.toLowerCase();
     if (low.includes("pai") || low.includes("budi")) return "PAI & Budi Pekerti";
-    if (low.includes("indonesia") || low.includes("bindo") || low.includes("b. indonesia")) return "Bahasa Indonesia";
-    if (low.includes("matematika") || low === "mtk" || low.includes("mtk")) return "Matematika";
+    if (low.includes("indonesia") || low.includes("bindo")) return "Bahasa Indonesia";
+    if (low.includes("matematika") || low === "mtk") return "Matematika";
     if (low.includes("ppkn") || low.includes("pancasila")) return "PPKN";
     if (low.includes("ipas")) return "IPAS";
     return s;
-  }
-
-  function getJudul(mapel: string, bab: number) {
-    const m = normalizeMapel(mapel);
-    if (JUDUL_BAB_ALL[kelas] && JUDUL_BAB_ALL[kelas][m] && JUDUL_BAB_ALL[kelas][m][String(bab)]) {
-      return JUDUL_BAB_ALL[kelas][m][String(bab)];
-    }
-    return "BAB " + bab;
   }
 
   return (
@@ -124,17 +117,15 @@ export default function DashboardKelasPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="font-bold text-base">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB - 5 Mapel</h1>
         <div className="flex gap-2 items-center">
-          <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode}</span>
-          <button onClick={function () { setShowPantau(!showPantau); }} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold">
-            Pantauan Orang Tua {hasil.length > 0 ? "(" + hasil.length + ")" : ""}
-          </button>
+          <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode || "Belum ada"}</span>
+          <button onClick={function () { setShowPantau(!showPantau); }} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold">Pantauan Orang Tua {hasil.length > 0 ? "(" + hasil.length + ")" : ""}</button>
         </div>
       </div>
 
       {showPantau && (
         <div className="border rounded-xl bg-white p-4 mb-5">
           <h2 className="font-bold text-sm mb-3">Pantauan Orang Tua - {kode} - {kelas.toUpperCase()}</h2>
-          {hasil.length === 0 ? <div className="text-sm text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan</div> : (
+          {hasil.length === 0 ? <div className="text-sm text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan untuk {kelas.toUpperCase()} dengan kode {kode}</div> : (
             <div className="border rounded-lg overflow-hidden">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50"><tr><th className="p-2 text-left">Waktu</th><th className="p-2 text-left">Mapel BAB</th><th className="p-2 text-center">Score</th></tr></thead>
@@ -142,7 +133,7 @@ export default function DashboardKelasPage() {
                   return (
                     <tr key={h.id} className="border-t">
                       <td className="p-2">{new Date(h.created_at).toLocaleString("id-ID")}</td>
-                      <td className="p-2"><b>{normalizeMapel(h.mapel)} BAB {h.bab}</b><br/><span className="text-[10px] text-gray-500">{getJudul(h.mapel, h.bab)}</span></td>
+                      <td className="p-2"><b>{normalizeMapel(h.mapel)} BAB {h.bab}</b><br/><span className="text-[10px] text-gray-500">{JUDUL_BAB_ALL[kelas] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] ? JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] : ""}</span></td>
                       <td className="p-2 text-center"><span className={h.score >= 70 ? "bg-green-100 text-green-700 px-2 py-1 rounded-full text-[10px] font-bold" : "bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-[10px] font-bold"}>{h.score}%</span></td>
                     </tr>
                   );
@@ -155,8 +146,8 @@ export default function DashboardKelasPage() {
 
       <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white p-5 mb-6">
         <div className="flex justify-between items-center">
-          <div><div className="text-xs opacity-80">Total Score Kelas</div><div className="text-4xl font-bold">{rata}%</div><div className="text-xs mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai - Benar {totalBenar} / {totalSoal || 0}</div></div>
-          <div className="text-center"><div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div><div className="text-[10px] mt-1 opacity-80">Progress</div></div>
+          <div><div className="text-xs opacity-80">Total Score Kelas - {kelas.toUpperCase()} (Voucher: {kode})</div><div className="text-4xl font-bold">{rata}%</div><div className="text-xs mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai - Benar {totalBenar} / {totalSoal || 0}</div></div>
+          <div className="text-center"><div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div><div className="text-[10px] mt-1 opacity-80">Progress {kelas.toUpperCase()}</div></div>
         </div>
         <div className="w-full bg-white/20 h-2 rounded-full mt-4"><div className="bg-white h-2 rounded-full" style={{ width: (totalBAB ? (selesai / totalBAB) * 100 : 0) + "%" }} /></div>
       </div>
@@ -169,17 +160,13 @@ export default function DashboardKelasPage() {
         hasil.filter(function (h) { return normalizeMapel(h.mapel) === mapel; }).forEach(function (h) { scoreMapel += h.score; });
         const rataMapel = doneMapel ? Math.round(scoreMapel / doneMapel) : 0;
         const w = WARNA[mapel] || { bg: "bg-gray-50", header: "bg-gray-100", pastel: "Pastel Abu" };
-        const iconPath = ICON_3D[mapel] || "/icons/book.png";
-
+        const iconPath = ICON_3D[mapel] || "/icons/bindo.png";
         return (
           <div key={mapel} className={"border rounded-xl p-3 mb-5 " + w.bg}>
             <div className={"flex justify-between items-center p-3 rounded-lg mb-3 border " + w.header}>
               <div className="flex items-center gap-3">
-                <img src={iconPath} alt={mapel} className="w-10 h-10 object-contain drop-shadow-sm" />
-                <div>
-                  <div className="font-bold text-sm">{mapel}</div>
-                  <div className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div>
-                </div>
+                <img src={iconPath} alt={mapel} className="w-10 h-10 object-contain" />
+                <div><div className="font-bold text-sm">{mapel}</div><div className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div></div>
               </div>
               <div className="w-24 h-1.5 bg-white/70 rounded-full"><div className="bg-black/20 h-1.5 rounded-full" style={{ width: (totalMapel ? (doneMapel / totalMapel) * 100 : 0) + "%" }} /></div>
             </div>
@@ -187,7 +174,7 @@ export default function DashboardKelasPage() {
               {Object.keys(babs).map(function (babStr) {
                 const bab = parseInt(babStr, 10);
                 const judul = babs[babStr];
-                const skor = hasil.find(function (h) { return normalizeMapel(h.mapel) === mapel && h.bab === bab; });
+                const skor = hasil.find(function (h) { return normalizeMapel(h.mapel) === mapel && Number(h.bab) === bab; });
                 return (
                   <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + encodeURIComponent(mapel) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
                     <div className="pr-2"><div className="text-[10px] text-gray-500">BAB {bab}</div><div className="font-bold text-xs leading-tight">{judul}</div><div className="text-[10px] text-gray-500 mt-1">{skor ? "Benar " + skor.benar : "Belum dikerjakan"}</div></div>
