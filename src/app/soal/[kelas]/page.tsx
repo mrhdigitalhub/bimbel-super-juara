@@ -1,149 +1,191 @@
 "use client";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
-import Link from "next/link";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Data 30 BAB dummy - ganti dengan data asli Bos kalau ada
-const MAPEL_DATA: any = {
-  "bsj-sd1": [
-    { name: "PAI & Budi Pekerti", bab: ["Rukun Iman","Bersuci & Wudhu","Mengenal Huruf Hijaiyah","Doa Sehari-hari","Kisah Nabi","Akhlak Terpuji"] },
-    { name: "Bahasa Indonesia", bab: ["Bunyi dan Huruf","Sapa dan Salam","Cerita Bergambar","Menulis Tegak Bersambung","Puisi Anak","Cerita Fabel"] },
-  ]
+// 30 BAB FIX - SESUAI TABEL KESEPAKATAN - 5 MAPEL
+const JUDUL_BAB_ALL: any = {
+  "bsj-sd1": {
+    "PAI & Budi Pekerti": { "1": "Rukun Iman", "2": "Bersuci & Wudhu", "3": "Mengenal Huruf Hijaiyah", "4": "Doa Sehari-hari", "5": "Kisah Nabi", "6": "Akhlak Terpuji" },
+    "Bahasa Indonesia": { "1": "Bunyi dan Huruf", "2": "Sapa dan Salam", "3": "Cerita Bergambar", "4": "Kosakata Baru", "5": "Kalimat Sederhana", "6": "Membaca Nyaring" },
+    "Matematika": { "1": "Bilangan 1-10", "2": "Penjumlahan & Pengurangan", "3": "Bangun Datar", "4": "Pengukuran Panjang", "5": "Waktu & Jam", "6": "Soal Cerita" },
+    "PPKN": { "1": "Aturan di Rumah", "2": "Aturan di Sekolah", "3": "Simbol Pancasila", "4": "Hidup Rukun", "5": "Toleransi", "6": "Gotong Royong" },
+    "IPAS": { "1": "Bagian Tubuh", "2": "Panca Indera", "3": "Makhluk Hidup", "4": "Benda di Sekitar", "5": "Cuaca", "6": "Lingkungan Bersih" }
+  },
+  "bsj-sd2": {
+    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
+    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
+    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
+    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+  },
+  "bsj-sd3": {
+    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
+    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
+    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
+    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+  },
+  "bsj-sd4": {
+    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
+    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
+    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
+    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+  },
+  "bsj-sd5": {
+    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
+    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
+    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
+    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+  },
+  "bsj-sd6": {
+    "PAI & Budi Pekerti": { "1": "Asmaul Husna", "2": "Sholat Wajib", "3": "Kisah Rasul", "4": "Jujur & Amanah", "5": "Hafalan Doa", "6": "Adab Sehari-hari" },
+    "Bahasa Indonesia": { "1": "Kalimat Efektif", "2": "Dongeng", "3": "Puisi Anak", "4": "Tanda Baca", "5": "Menulis Cerita", "6": "Wawancara" },
+    "Matematika": { "1": "Bilangan 1-100", "2": "Perkalian & Pembagian", "3": "Uang", "4": "Jam & Waktu", "5": "Bangun Ruang", "6": "Pengukuran Berat" },
+    "PPKN": { "1": "Lambang Negara", "2": "Hak & Kewajiban", "3": "Musyawarah", "4": "Kerja Sama", "5": "Keberagaman", "6": "Cinta Tanah Air" },
+    "IPAS": { "1": "Tumbuhan", "2": "Hewan", "3": "Energi", "4": "Air & Udara", "5": "Bumi & Langit", "6": "Teknologi Sederhana" }
+  }
 };
 
-export default function SoalKelasDashboard() {
+const ICON_3D: any = {
+  "PAI & Budi Pekerti": "/icons/pai.png",
+  "Bahasa Indonesia": "/icons/bindo.png",
+  "Matematika": "/icons/mtk.png",
+  "PPKN": "/icons/ppkn.png",
+  "IPAS": "/icons/ipas.png"
+};
+
+const WARNA: any = {
+  "PAI & Budi Pekerti": { bg: "bg-emerald-50", header: "bg-emerald-100", pastel: "Pastel Hijau Tua" },
+  "Bahasa Indonesia": { bg: "bg-orange-50", header: "bg-orange-100", pastel: "Pastel Orange" },
+  "Matematika": { bg: "bg-green-50", header: "bg-green-100", pastel: "Pastel Hijau" },
+  "PPKN": { bg: "bg-blue-50", header: "bg-blue-100", pastel: "Pastel Biru" },
+  "IPAS": { bg: "bg-yellow-50", header: "bg-yellow-100", pastel: "Pastel Kuning" }
+};
+
+type Hasil = { id: string; kode_akses: string; kelas: string; mapel: string; bab: number; benar: number; salah: number; score: number; created_at: string; };
+
+export default function DashboardKelasPage() {
   const params = useParams();
-  const kelasParam = (params?.kelas as string) || "bsj-sd1";
-  const kelas = kelasParam.toLowerCase();
-  const router = useRouter();
+  const kelas = ((params.kelas as string) || "bsj-sd1").toLowerCase();
+  const [kode, setKode] = useState("");
+  const [hasil, setHasil] = useState<Hasil[]>([]);
+  const [showPantau, setShowPantau] = useState(false);
 
-  const [kodeAktif, setKodeAktif] = useState("Belum ada");
-  const [namaAnak, setNamaAnak] = useState("");
-  const [totalScore, setTotalScore] = useState(0);
-  const [babDone, setBabDone] = useState(0);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // 1. Baca dari localStorage (yang disimpan halaman /kode)
-    const k = localStorage.getItem("bsj_kode_aktif");
-    const kKelas = localStorage.getItem("bsj_kelas_aktif");
-    const nAnak = localStorage.getItem("bsj_nama_anak") || "";
-    
-    if (k) {
-      setKodeAktif(k);
-    } else {
-      setKodeAktif("Belum ada");
-    }
-    setNamaAnak(nAnak);
-
-    // 2. Kalau kode ada tapi kelas beda - paksa redirect ke kelas yang sesuai kode
-    if (k && kKelas && kKelas !== kelas) {
-      // misal kode SD2 tapi buka SD1 -> lempar ke SD2
-      // window.location.href = `/soal/${kKelas}`; // aktifkan kalau mau strict 1 voucher 1 kelas
-    }
-
-    // 3. Load score dari Supabase - FILTER KODE + KELAS (logic a,b,c)
-    async function loadScore() {
-      if (!k || k === "Belum ada") {
-        setLoading(false);
-        return;
-      }
-      try {
-        // Logic baru: filter kode_akses + kelas (biar score gak ketuker)
-        const { data, error } = await supabase
-          .from("hasil_latihan")
-          .select("*")
-          .eq("kode_akses", k)
-          .ilike("kelas", `%${kelas}%`); // ilike biar BSJ-SD1 - Kelas 1 masih kebaca
-
-        if (error) throw error;
-        if (data) {
-          const done = data.filter((d:any) => d.skor >= 60).length; // anggap selesai kalau >=60
-          const benar = data.reduce((s:number, d:any)=> s + (d.jumlah_benar||0), 0);
-          const total = data.length > 0 ? Math.round(data.reduce((s:number,d:any)=> s + (d.skor||0),0)/data.length) : 0;
-          setBabDone(done);
-          setTotalScore(total);
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadScore();
+  useEffect(function () {
+    const k = localStorage.getItem("bsj_kode_aktif") || "";
+    setKode(k);
+    if (!k) return;
+    // FIX a,b,c: 1 voucher hanya untuk 1 kelas + beda voucher bisa masuk kelas sama tapi score gak ketuker
+    supabase.from("hasil_latihan").select("*").eq("kode_akses", k).eq("kelas", kelas).order("created_at", { ascending: false }).then(function (res) {
+      if (res.data) setHasil(res.data as any);
+    });
   }, [kelas]);
 
-  function handleLogout() {
-    localStorage.removeItem("bsj_kode_aktif");
-    localStorage.removeItem("bsj_kelas_aktif");
-    router.push("/kode");
+  const judulBabKelas = JUDUL_BAB_ALL[kelas] || JUDUL_BAB_ALL["bsj-sd1"];
+  let totalBAB = 0;
+  Object.values(judulBabKelas).forEach(function (m: any) { totalBAB += Object.keys(m).length; });
+
+  const selesai = hasil.length;
+  let totalScore = 0;
+  hasil.forEach(function (h) { totalScore += h.score; });
+  const rata = selesai ? Math.round(totalScore / selesai) : 0;
+
+  let totalBenar = 0;
+  let totalSoal = 0;
+  hasil.forEach(function (h) { totalBenar += h.benar; totalSoal += h.benar + h.salah; });
+
+  function normalizeMapel(s: string) {
+    const low = s.toLowerCase();
+    if (low.includes("pai") || low.includes("budi")) return "PAI & Budi Pekerti";
+    if (low.includes("indonesia") || low.includes("bindo")) return "Bahasa Indonesia";
+    if (low.includes("matematika") || low === "mtk") return "Matematika";
+    if (low.includes("ppkn") || low.includes("pancasila")) return "PPKN";
+    if (low.includes("ipas")) return "IPAS";
+    return s;
   }
 
-  const mapels = MAPEL_DATA[kelas] || MAPEL_DATA["bsj-sd1"];
-
   return (
-    <div className="min-h-screen bg-[#f8f5ff] p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="font-bold text-sm">BSJ-SD1 - Dashboard Score Lengkap 30 BAB - 5 Mapel</h1>
-          <div className="flex gap-2 items-center">
-            <span className="bg-green-50 text-green-700 text-[10px] px-2 py-1 rounded-full border border-green-200">Kode: {kodeAktif}</span>
-            <button onClick={()=>router.push("/kode")} className="bg-black text-white text-[10px] px-3 py-1 rounded-full">Pantauan Orang Tua</button>
-          </div>
+    <div className="max-w-4xl mx-auto p-4 bg-[#fffcf5] min-h-screen">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="font-bold text-base">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB - 5 Mapel</h1>
+        <div className="flex gap-2 items-center">
+          <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode || "Belum ada"}</span>
+          <button onClick={function () { setShowPantau(!showPantau); }} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold">Pantauan Orang Tua {hasil.length > 0 ? "(" + hasil.length + ")" : ""}</button>
         </div>
+      </div>
 
-        {/* HEADER SCORE */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-500 rounded-xl p-5 text-white relative overflow-hidden mb-4">
-          <div className="flex justify-between">
-            <div>
-              <p className="text-[10px] opacity-80">Total Score Kelas - {kelas.toUpperCase()} (Voucher: {kodeAktif})</p>
-              <p className="text-3xl font-bold">{loading ? "..." : `${totalScore}%`}</p>
-              <p className="text-[10px] mt-1 opacity-80">{babDone} / 30 BAB selesai - {namaAnak ? `Anak: ${namaAnak}` : `Benar 0 / 0`}</p>
-            </div>
-            <div className="bg-white/20 rounded-full w-12 h-12 flex items-center justify-center font-bold">{loading ? "..." : `${totalScore}%`}</div>
-          </div>
-          <div className="w-full bg-white/20 h-1.5 rounded-full mt-3">
-            <div className="bg-white h-1.5 rounded-full" style={{width: `${totalScore}%`}}></div>
-          </div>
-          {kodeAktif === "Belum ada" && (
-            <div className="mt-3 bg-yellow-400 text-black text-xs p-2 rounded-lg text-center">
-              ⚠️ Voucher belum aktif. <Link href="/kode" className="underline font-bold">Aktifkan di /kode</Link>
+      {showPantau && (
+        <div className="border rounded-xl bg-white p-4 mb-5">
+          <h2 className="font-bold text-sm mb-3">Pantauan Orang Tua - {kode} - {kelas.toUpperCase()}</h2>
+          {hasil.length === 0 ? <div className="text-sm text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan untuk {kelas.toUpperCase()} dengan kode {kode}</div> : (
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50"><tr><th className="p-2 text-left">Waktu</th><th className="p-2 text-left">Mapel BAB</th><th className="p-2 text-center">Score</th></tr></thead>
+                <tbody>{hasil.map(function (h) {
+                  return (
+                    <tr key={h.id} className="border-t">
+                      <td className="p-2">{new Date(h.created_at).toLocaleString("id-ID")}</td>
+                      <td className="p-2"><b>{normalizeMapel(h.mapel)} BAB {h.bab}</b><br/><span className="text-[10px] text-gray-500">{JUDUL_BAB_ALL[kelas] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] ? JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] : ""}</span></td>
+                      <td className="p-2 text-center"><span className={h.score >= 70 ? "bg-green-100 text-green-700 px-2 py-1 rounded-full text-[10px] font-bold" : "bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-[10px] font-bold"}>{h.score}%</span></td>
+                    </tr>
+                  );
+                })}</tbody>
+              </table>
             </div>
           )}
         </div>
+      )}
 
-        {/* MAPEL CARDS - sama seperti foto Bos */}
-        {mapels.map((m:any, idx:number)=>(
-          <div key={idx} className="bg-[#f0fdf4] border border-green-900/10 rounded-xl p-3 mb-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">📦</div>
-              <div>
-                <p className="font-bold text-xs">{m.name}</p>
-                <p className="text-[9px] text-gray-500">0/6 BAB - Rata 0% - Pastel Hijau Tua</p>
+      <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white p-5 mb-6">
+        <div className="flex justify-between items-center">
+          <div><div className="text-xs opacity-80">Total Score Kelas - {kelas.toUpperCase()} (Voucher: {kode})</div><div className="text-4xl font-bold">{rata}%</div><div className="text-xs mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai - Benar {totalBenar} / {totalSoal || 0}</div></div>
+          <div className="text-center"><div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div><div className="text-[10px] mt-1 opacity-80">Progress {kelas.toUpperCase()}</div></div>
+        </div>
+        <div className="w-full bg-white/20 h-2 rounded-full mt-4"><div className="bg-white h-2 rounded-full" style={{ width: (totalBAB ? (selesai / totalBAB) * 100 : 0) + "%" }} /></div>
+      </div>
+
+      {Object.keys(judulBabKelas).map(function (mapel) {
+        const babs = judulBabKelas[mapel];
+        const totalMapel = Object.keys(babs).length;
+        const doneMapel = hasil.filter(function (h) { return normalizeMapel(h.mapel) === mapel; }).length;
+        let scoreMapel = 0;
+        hasil.filter(function (h) { return normalizeMapel(h.mapel) === mapel; }).forEach(function (h) { scoreMapel += h.score; });
+        const rataMapel = doneMapel ? Math.round(scoreMapel / doneMapel) : 0;
+        const w = WARNA[mapel] || { bg: "bg-gray-50", header: "bg-gray-100", pastel: "Pastel Abu" };
+        const iconPath = ICON_3D[mapel] || "/icons/bindo.png";
+        return (
+          <div key={mapel} className={"border rounded-xl p-3 mb-5 " + w.bg}>
+            <div className={"flex justify-between items-center p-3 rounded-lg mb-3 border " + w.header}>
+              <div className="flex items-center gap-3">
+                <img src={iconPath} alt={mapel} className="w-10 h-10 object-contain" />
+                <div><div className="font-bold text-sm">{mapel}</div><div className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div></div>
               </div>
+              <div className="w-24 h-1.5 bg-white/70 rounded-full"><div className="bg-black/20 h-1.5 rounded-full" style={{ width: (totalMapel ? (doneMapel / totalMapel) * 100 : 0) + "%" }} /></div>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {m.bab.map((babName:string, bIdx:number)=>(
-                <Link key={bIdx} href={`/soal/${kelas}/latihan?mapel=${encodeURIComponent(m.name)}&bab=${bIdx+1}`} className="bg-white rounded-lg p-2 border border-black/5 hover:border-purple-400">
-                  <p className="text-[8px] text-gray-500">BAB {bIdx+1}</p>
-                  <p className="text-[10px] font-bold leading-tight">{babName}</p>
-                  <p className="text-[8px] text-gray-400 mt-1">Belum dikerjakan</p>
-                </Link>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {Object.keys(babs).map(function (babStr) {
+                const bab = parseInt(babStr, 10);
+                const judul = babs[babStr];
+                const skor = hasil.find(function (h) { return normalizeMapel(h.mapel) === mapel && Number(h.bab) === bab; });
+                return (
+                  <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + encodeURIComponent(mapel) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
+                    <div className="pr-2"><div className="text-[10px] text-gray-500">BAB {bab}</div><div className="font-bold text-xs leading-tight">{judul}</div><div className="text-[10px] text-gray-500 mt-1">{skor ? "Benar " + skor.benar : "Belum dikerjakan"}</div></div>
+                    <div className={skor ? (skor.score >= 70 ? "bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-full font-bold" : "bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-full font-bold") : "bg-gray-100 text-gray-600 text-[10px] px-2 py-1 rounded-full font-bold"}>{skor ? skor.score + "%" : "0%"}</div>
+                  </a>
+                );
+              })}
             </div>
           </div>
-        ))}
-
-        <div className="text-center mt-6">
-          <button onClick={handleLogout} className="text-[10px] text-gray-400 underline">Ganti Voucher / Logout</button>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }
