@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabase'
 
 const MAPEL_MAP: Record<string, string[]> = {
   'PAI': ['Pendidikan Agama & Budi Pekerti', 'PAI & Budi Pekerti', 'PAI'],
