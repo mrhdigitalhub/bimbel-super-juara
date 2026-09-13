@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase } from "../../lib/supabase"
 
 const PAKET_INFO: any = {
   'BSJ-SD1': { kelas: 'sd1', nama: 'Kelas 1 SD', total: 600, tag: 'Pemula', warna: 'from-pink-200 to-pink-100' },
