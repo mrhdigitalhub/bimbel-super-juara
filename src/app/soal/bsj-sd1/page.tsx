@@ -75,7 +75,7 @@ type Hasil = { id: string; kode_akses: string; kelas: string; mapel: string; bab
 
 export default function DashboardKelasPage() {
   const params = useParams();
-  const kelas = ((params.kelas as string) || "bsj-sd1").toLowerCase();
+  const kelas = "bsj-sd1".toLowerCase();
   const [kode, setKode] = useState("");
   const [hasil, setHasil] = useState<Hasil[]>([]);
   const [showPantau, setShowPantau] = useState(false);
@@ -103,6 +103,25 @@ export default function DashboardKelasPage() {
   }, [kelas]);
 
   const judulBabKelas = JUDUL_BAB_ALL[kelas] || JUDUL_BAB_ALL["bsj-sd1"];
+
+      const SLUG_MAP: any = {
+        "pai": "PAI & Budi Pekerti",
+        "pai-budi": "PAI & Budi Pekerti",
+        "bahasa-indonesia": "Bahasa Indonesia",
+        "bindo": "Bahasa Indonesia",
+        "matematika": "Matematika",
+        "mtk": "Matematika",
+        "ppkn": "PPKN",
+        "ipas": "IPAS"
+      };
+      const REVERSE_SLUG: any = {
+        "PAI & Budi Pekerti": "pai",
+        "Bahasa Indonesia": "bahasa-indonesia",
+        "Matematika": "matematika",
+        "PPKN": "ppkn",
+        "IPAS": "ipas"
+      };
+
   let totalBAB = 0;
   Object.values(judulBabKelas).forEach(function (m: any) { totalBAB += Object.keys(m).length; });
 
@@ -189,7 +208,7 @@ export default function DashboardKelasPage() {
                 const judul = babs[babStr];
                 const skor = hasil.find(function (h) { return normalizeMapel(h.mapel) === mapel && Number(h.bab) === bab; });
                 return (
-                  <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + encodeURIComponent(mapel) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
+                  <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + (REVERSE_SLUG[mapel]||encodeURIComponent(mapel)) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
                     <div className="pr-2"><div className="text-[10px] text-gray-500">BAB {bab}</div><div className="font-bold text-xs leading-tight">{judul}</div><div className="text-[10px] text-gray-500 mt-1">{skor ? "Benar " + skor.benar : "Belum dikerjakan"}</div></div>
                     <div className={skor ? (skor.score >= 70 ? "bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-full font-bold" : "bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-full font-bold") : "bg-gray-100 text-gray-600 text-[10px] px-2 py-1 rounded-full font-bold"}>{skor ? skor.score + "%" : "0%"}</div>
                   </a>

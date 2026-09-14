@@ -34,7 +34,20 @@ function getKunci(s:any): number {
 
 function LatihanContent(){
   const searchParams = useSearchParams();
-  const mapel = searchParams.get("mapel") || "PAI & Budi Pekerti";
+  const mapelRaw = searchParams.get("mapel") || "pai";
+  const SLUG_TO_MAPEL: any = {
+    "pai": "PAI & Budi Pekerti",
+    "pai-budi": "PAI & Budi Pekerti",
+    "bahasa-indonesia": "Bahasa Indonesia",
+    "bindo": "Bahasa Indonesia",
+    "matematika": "Matematika",
+    "mtk": "Matematika",
+    "ppkn": "PPKN",
+    "ipas": "IPAS",
+    "PAI & Budi Pekerti": "PAI & Budi Pekerti",
+    "Bahasa Indonesia": "Bahasa Indonesia"
+  };
+  const mapel = SLUG_TO_MAPEL[mapelRaw] || SLUG_TO_MAPEL[decodeURIComponent(mapelRaw)] || mapelRaw;
   const bab = parseInt(searchParams.get("bab") || "1",10);
   const kelasParam = searchParams.get("kelas") as string | null;
   // kelas dari URL path fallback
