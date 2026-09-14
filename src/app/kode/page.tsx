@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -8,106 +8,89 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Biar gak di-prerender Vercel
-export const dynamic = 'force-dynamic';
-
-function KodeForm() {
-  const searchParams = useSearchParams();
+export default function KodePage(){
   const router = useRouter();
-  const codeFromUrl = searchParams.get("code") || "";
+  const [code,setCode]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [msg,setMsg]=useState("");
 
-  const [kode, setKode] = useState(codeFromUrl);
-  const [hpOrtu, setHpOrtu] = useState("");
-  const [hpAnak, setHpAnak] = useState("");
-  const [namaAnak, setNamaAnak] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  useEffect(() => {
-    if (codeFromUrl) setKode(codeFromUrl.toUpperCase());
-  }, [codeFromUrl]);
-
-  function getKelasFromKode(kodeStr: string) {
-    const k = kodeStr.toUpperCase();
-    if (k.includes("SD1")) return "bsj-sd1";
-    if (k.includes("SD2")) return "bsj-sd2";
-    if (k.includes("SD3")) return "bsj-sd3";
-    if (k.includes("SD4")) return "bsj-sd4";
-    if (k.includes("SD5")) return "bsj-sd5";
-    if (k.includes("SD6")) return "bsj-sd6";
-    return "bsj-sd1";
-  }
-
-  async function handleAktifkan() {
-    if (!kode.trim() || !hpOrtu.trim() || !namaAnak.trim()) {
-      setMsg("Lengkapi: Kode Voucher, HP Ortu, Nama Anak");
+  const handleRedeem = async()=>{
+    const kode = code.trim().toUpperCase();
+    if(!kode){
+      setMsg("❌ Masukkan kode voucher dulu!");
       return;
     }
     setLoading(true);
-    setMsg("Mengaktifkan...");
+    setMsg(`🔍 Cek kode ${kode} di public.vouchers...`);
 
-    const kodeFinal = kode.trim().toUpperCase();
-    const kelasAktif = getKelasFromKode(kodeFinal);
+    // FIX 100% SINKRON dengan screenshot vouchers kamu: tabel vouchers, kolom code, paket, status
+    const { data, error } = await supabase.from("vouchers").select("*").eq("code", kode).single();
 
-    try {
-      await supabase.from("voucher_aktif").upsert({
-        kode_akses: kodeFinal,
-        hp_ortu: hpOrtu.trim(),
-        hp_anak: hpAnak.trim(),
-        nama_anak: namaAnak.trim(),
-        kelas: kelasAktif,
-        aktif_sampai: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'kode_akses' });
-    } catch (e) {
-      console.log("supabase skip", e);
+    if(error || !data){
+      setMsg(`❌ Kode ${kode} tidak ditemukan di public.vouchers. Cek di Supabase → Table Editor → vouchers, pastikan code ada.`);
+      setLoading(false);
+      return;
     }
 
-    // Simpan untuk dibaca dashboard /soal/[kelas]
-    localStorage.setItem("bsj_kode_aktif", kodeFinal);
-    localStorage.setItem("bsj_kelas_aktif", kelasAktif);
-    localStorage.setItem("bsj_hp_ortu", hpOrtu.trim());
-    localStorage.setItem("bsj_hp_anak", hpAnak.trim());
-    localStorage.setItem("bsj_nama_anak", namaAnak.trim());
-    localStorage.setItem("bsj_aktif_sampai", new Date(Date.now() + 30*24*60*60*1000).toISOString());
+    if(data.status!=="AVAILABLE"){
+      // Jika sudah USED, masih boleh masuk tapi kasih warning
+      setMsg(`⚠️ Kode ${kode} statusnya ${data.status}, tapi tetap coba masuk ke kelas ${data.paket}...`);
+    } else {
+      setMsg(`✅ Kode valid! Paket: ${data.paket.toUpperCase()} - Rp ${data.nominal?.toLocaleString('id-ID')} - Masuk ke /soal/${data.paket}...`);
+    }
 
-    setMsg(`Berhasil! Masuk ke ${kelasAktif.toUpperCase()}...`);
-    
-    setTimeout(() => {
-      window.location.href = `/soal/${kelasAktif}`;
+    // SIMPAN KODE KE LOCALSTORAGE sesuai format yang dipakai dashboard bsj-sd1
+    // Dashboard baca dari bsj_kode_aktif_bsj-sd1 dan bsj_kode_aktif_sd1
+    const paket = data.paket.toLowerCase(); // bsj-sd1
+    const short = paket.replace("bsj-",""); // sd1
+    localStorage.setItem(`bsj_kode_aktif_${paket}`, kode);
+    localStorage.setItem(`bsj_kode_aktif_${short}`, kode);
+    localStorage.setItem("bsj_kode_aktif", kode); // fallback lama
+    localStorage.setItem("bsj_paket_aktif", paket);
+
+    // OPTIONAL: update status jadi USED jika kamu mau (bisa di-comment jika mau bisa dipakai berkali-kali)
+    // await supabase.from("vouchers").update({ status: "USED" }).eq("code", kode);
+
+    setTimeout(()=>{
+      router.push(`/soal/${paket}`);
     }, 800);
-  }
-
-  const kelasPreview = getKelasFromKode(kode);
+  };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-black border border-yellow-500/30 rounded-2xl p-6 shadow-[0_0_30px_rgba(234,179,8,0.15)]">
-        <div className="text-center mb-6">
-          <div className="inline-block border border-yellow-500 text-yellow-500 text-[10px] px-3 py-1 rounded-full tracking-widest">PREMIUM 30 HARI</div>
-          <h1 className="text-yellow-500 font-bold mt-4 text-sm">AKTIFKAN KARTU PREMIUM</h1>
-          <p className="text-white/50 text-[10px] mt-1">Aktif 30 hari - kode: {kode || "BSJ-SD1-XXXX"}</p>
+    <div className="min-h-screen bg-[#FFFEF5] flex items-center justify-center p-5">
+      <div className="w-full max-w-[420px] bg-white rounded-[24px] border shadow-sm p-6">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-full bg-[#0E2A6B] text-white flex items-center justify-center font-black mx-auto">M</div>
+          <h1 className="mt-3 font-black text-[20px]">Masukkan Kode Voucher</h1>
+          <p className="mt-1 text-[12px] opacity-60">Kode dari Admin setelah beli paket Rp17rb - Cek di public.vouchers</p>
         </div>
-        <div className="space-y-3">
-          <input value={kode} onChange={(e)=>setKode(e.target.value)} placeholder="BSJ-SD1-XXXX" className="w-full bg-black border border-yellow-500/50 rounded-lg p-3 text-sm text-yellow-500 placeholder:text-yellow-500/30 uppercase font-mono" />
-          <input value={hpOrtu} onChange={(e)=>setHpOrtu(e.target.value)} placeholder="HP ORANG TUA" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
-          <input value={hpAnak} onChange={(e)=>setHpAnak(e.target.value)} placeholder="HP ANAK (YANG BELAJAR)" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
-          <input value={namaAnak} onChange={(e)=>setNamaAnak(e.target.value)} placeholder="NAMA ANAK" className="w-full bg-black border border-white/20 rounded-lg p-3 text-sm text-white placeholder:text-white/30" />
-          {msg && <div className="bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs p-3 rounded-lg text-center">{msg}</div>}
-          <button onClick={handleAktifkan} disabled={loading} className="w-full bg-yellow-500 text-black rounded-lg py-3 text-sm font-bold hover:bg-yellow-400 disabled:opacity-50">
-            {loading ? "Memproses..." : "🚀 AKTIFKAN 30 HARI"}
-          </button>
-          <p className="text-white/30 text-[10px] text-center mt-2">Langsung masuk kelas {kelasPreview.toUpperCase()} - tanpa pilih kelas lagi</p>
+
+        <div className="mt-6">
+          <label className="text-[11px] font-black tracking-widest opacity-60">KODE VOUCHER (contoh: BSJ-SD1-455E)</label>
+          <input value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="BSJ-SD1-XXXX" className="mt-2 w-full rounded-full border-2 border-[#0E2A6B]/20 px-5 py-3 font-mono font-black text-[16px] tracking-widest text-[#0E2A6B] placeholder:opacity-30" />
+        </div>
+
+        <button onClick={handleRedeem} disabled={loading} className="mt-4 w-full rounded-full bg-[#FF8C00] text-white font-black py-3.5 text-[14px] disabled:opacity-50 shadow-[0_8px_20px_rgba(255,140,0,0.3)]">
+          {loading ? "⏳ Cek kode..." : "🚀 Masuk ke Kelas →"}
+        </button>
+
+        {msg && <div className="mt-4 rounded-xl bg-[#FFFEF5] border p-3 text-[12px] font-bold leading-relaxed">{msg}</div>}
+
+        <div className="mt-6 rounded-xl bg-[#0E2A6B] text-white p-4">
+          <div className="font-bold text-[11px]">Alur FINAL yang benar:</div>
+          <ul className="mt-2 space-y-1 text-[11px] opacity-80 list-decimal pl-4">
+            <li>Siswa beli → Admin buat voucher di /admin → kode masuk public.vouchers (704 records)</li>
+            <li>Siswa buka <b>/kode</b> → masukin BSJ-SD1-455E</li>
+            <li>Sistem cek di <b>public.vouchers</b> → kalau AVAILABLE → simpan ke localStorage bsj_kode_aktif_bsj-sd1</li>
+            <li>Redirect ke /soal/bsj-sd1 → dashboard muncul Voucher: BSJ-SD1-455E (dinamis)</li>
+          </ul>
+          <div className="mt-3 text-[10px] opacity-50">/redeem akan di-redirect ke /kode biar tidak dobel.</div>
+        </div>
+
+        <div className="mt-4 text-center">
+          <a href="/admin" className="text-[11px] underline opacity-50">Admin? Buat voucher di /admin</a>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function KodePage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-yellow-500 text-sm">Loading...</div>}>
-      <KodeForm />
-    </Suspense>
   );
 }
