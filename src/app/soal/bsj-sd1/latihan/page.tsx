@@ -1,5 +1,5 @@
-
 "use client";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -9,11 +9,11 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function LatihanPage(){
+function LatihanContent(){
   const searchParams = useSearchParams();
   const mapel = searchParams.get("mapel") || "Matematika";
   const bab = parseInt(searchParams.get("bab") || "1",10);
-  const kelas = "bsj-sd1"; // FINAL: khusus SD1
+  const kelas = "bsj-sd1";
 
   const [soal,setSoal]=useState<any[]>([]);
   const [loading,setLoading]=useState(true);
@@ -22,25 +22,22 @@ export default function LatihanPage(){
   useEffect(()=>{
     const fetchSoal = async()=>{
       setLoading(true);
-      // FIX 0 SOAL: coba 4 format kelas yang mungkin ada di Supabase
       const formats = ["bsj-sd1","sd1","SD1","bsj_sd1"];
       let found:any[] = [];
       let q = "";
       for(const fmt of formats){
-        const { data, error } = await supabase.from("soal").select("*").eq("kelas", fmt).eq("mapel", mapel).eq("bab_ke", bab);
+        const { data } = await supabase.from("soal").select("*").eq("kelas", fmt).eq("mapel", mapel).eq("bab_ke", bab);
         q = `SELECT * FROM soal WHERE kelas='${fmt}' AND mapel='${mapel}' AND bab_ke=${bab}`;
         if(data && data.length>0){ found=data; break; }
-        // fallback ILIKE
         const { data: data2 } = await supabase.from("soal").select("*").ilike("kelas", `%${fmt}%`).eq("mapel", mapel).eq("bab_ke", bab);
         if(data2 && data2.length>0){ found=data2; q += " (ILIKE)"; break; }
       }
       if(found.length===0){
-        // last try: tanpa filter kelas, hanya mapel & bab
         const { data: data3 } = await supabase.from("soal").select("*").eq("mapel", mapel).eq("bab_ke", bab).limit(5);
         if(data3 && data3.length>0){
-          setDebug(`Kelas format di DB beda. Contoh data: ${JSON.stringify(data3[0]).slice(0,200)} | Query terakhir: ${q}`);
+          setDebug(`Kelas format di DB beda. Contoh: ${JSON.stringify(data3[0]).slice(0,200)} | Query: ${q}`);
         } else {
-          setDebug(`0 SOAL - Query: ${q} | Cek di Supabase: SELECT * FROM soal WHERE kelas ILIKE '%sd1%' LIMIT 5`);
+          setDebug(`0 SOAL - Query: ${q} | Cek Supabase: SELECT * FROM soal WHERE kelas ILIKE '%sd1%' LIMIT 5`);
         }
       }
       setSoal(found);
@@ -62,7 +59,6 @@ Kelas: bsj-sd1 (FIX: coba format sd1, SD1, bsj-sd1, bsj_sd1)
 Mapel: {mapel}
 BAB: {bab}
           </div>
-          <div className="mt-3 text-[11px] opacity-70">Jika 0 terus, buka Supabase → Table Editor → soal → jalankan: SELECT * FROM soal WHERE kelas ILIKE '%sd1%' LIMIT 5 untuk lihat format kelas yang tersimpan</div>
         </div>
       </div>
     );
@@ -73,11 +69,19 @@ BAB: {bab}
       <a href="/soal/bsj-sd1" className="text-[12px] font-bold">← Kembali ke Dashboard BSJ-SD1 - 30 BAB</a>
       <div className="mt-4 border rounded-xl p-4 bg-white">
         <h1 className="font-black">BSJ-SD1 - {mapel} BAB {bab} - {soal.length} SOAL</h1>
-        <div className="text-[11px] opacity-60">Mapel: {mapel} | Judul: BAB {bab} | Kelas: bsj-sd1</div>
+        <div className="text-[11px] opacity-60">Mapel: {mapel} | BAB {bab} | Kelas: bsj-sd1</div>
       </div>
       <div className="mt-4 space-y-3">
         {soal.map((s,i)=><div key={s.id||i} className="border rounded-xl p-4 bg-white"><div className="font-bold text-[13px]">{i+1}. {s.soal||s.pertanyaan}</div></div>)}
       </div>
     </div>
+  );
+}
+
+export default function LatihanPage(){
+  return (
+    <Suspense fallback={<div className="p-10 text-center">Loading latihan...</div>}>
+      <LatihanContent/>
+    </Suspense>
   );
 }
