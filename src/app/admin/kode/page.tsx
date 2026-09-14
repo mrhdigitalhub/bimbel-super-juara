@@ -1,102 +1,127 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import Link from 'next/link'
+"use client";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+);
 
-export default function AdminKodePage() {
-  const [kodes, setKodes] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filterKelas, setFilterKelas] = useState('SEMUA')
-  const [filterStatus, setFilterStatus] = useState('SEMUA')
+export default function AdminKodePage(){
+  const [vouchers,setVouchers]=useState<any[]>([]);
+  const [search,setSearch]=useState("");
+  const [filterPaket,setFilterPaket]=useState("all");
+  const [filterStatus,setFilterStatus]=useState("all");
+  const [loading,setLoading]=useState(true);
 
-  useEffect(()=>{ fetchKode() }, [filterKelas, filterStatus])
+  useEffect(()=>{ load(); },[]);
 
-  async function fetchKode() {
-    setLoading(true)
-    let q = supabase.from('kode_akses').select('*').order('created_at',{ascending:false})
-    if (filterKelas!=='SEMUA') q = q.eq('paket_kode', filterKelas)
-    if (filterStatus!=='SEMUA') q = q.eq('status', filterStatus)
-    const {data} = await q.limit(300)
-    setKodes(data||[])
-    setLoading(false)
-  }
+  const load = async()=>{
+    setLoading(true);
+    const { data } = await supabase.from("vouchers").select("*").order("created_at",{ascending:false}).limit(500);
+    if(data) setVouchers(data);
+    setLoading(false);
+  };
 
-  async function updateStatus(id:string, status:string){
-    await supabase.from('kode_akses').update({status}).eq('id',id)
-    fetchKode()
-  }
+  const filtered = vouchers.filter(v=>{
+    const matchSearch = !search || v.code?.toLowerCase().includes(search.toLowerCase());
+    const matchPaket = filterPaket==="all" || v.paket===filterPaket;
+    const matchStatus = filterStatus==="all" || v.status===filterStatus;
+    return matchSearch && matchPaket && matchStatus;
+  });
 
-  function print() { window.print() }
+  const copyText = (code:string, paket:string, nominal:number)=>{
+    const text = `✅ Voucher Bimbel Super Juara Aktif!
 
-  const total = kodes.length
+Kode: *${code}*
+Paket: ${paket.toUpperCase()} - 900 Soal KurMer 2025
+Harga: Rp ${nominal?.toLocaleString('id-ID')}
+
+Cara pakai:
+1. Buka: https://bimbel-super-juara.vercel.app/redeem
+2. Masukkan kode: ${code}
+3. Langsung akses soal + score + penjelasan
+
+WA Admin: 081770220059`;
+    navigator.clipboard.writeText(text);
+    alert("Teks WA disalin!");
+  };
+
+  const paketList = Array.from(new Set(vouchers.map(v=>v.paket)));
 
   return (
-    <div className="min-h-screen bg-[#fff5f7] p-4">
-      <style>{`@media print {.no-print{display:none} .print-card{break-inside:avoid; border:2px dashed black !important;}}`}</style>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-wrap justify-between gap-3 items-center mb-4 no-print">
-          <h1 className="text-2xl font-black">🎟️ Admin Voucher - 17RB / KELAS</h1>
+    <div className="min-h-screen bg-[#FFFEF5] p-4">
+      <div className="max-w-[1100px] mx-auto">
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h1 className="font-black text-[20px]">📋 Daftar Voucher - {vouchers.length} kode</h1>
+            <p className="text-[11px] opacity-60">Tabel: <b>public.vouchers</b> | Cek di Supabase → Table Editor → vouchers (seperti screenshot kamu)</p>
+          </div>
           <div className="flex gap-2">
-            <Link href="/soal" className="bg-black text-white px-4 py-2 rounded-full text-sm font-bold">Lihat /soal</Link>
-            <button onClick={print} className="bg-white border-2 px-4 py-2 rounded-full text-sm font-bold">🖨️ Cetak</button>
+            <a href="/admin" className="rounded-full bg-[#0E2A6B] text-white px-4 py-2 text-[12px] font-bold">← Buat Voucher Baru (/admin)</a>
+            <button onClick={load} className="rounded-full bg-white border px-4 py-2 text-[12px] font-bold">🔄 Refresh</button>
           </div>
         </div>
 
-        {/* FILTER */}
-        <div className="flex flex-wrap gap-2 mb-4 no-print">
-          <select value={filterKelas} onChange={e=>setFilterKelas(e.target.value)} className="border-2 rounded-full px-4 py-2 font-bold bg-white">
-            <option value="SEMUA">SEMUA KELAS (650 kode)</option>
-            <option value="BSJ-SD1">BSJ-SD1 (100 kode)</option>
-            <option value="BSJ-SD2">BSJ-SD2 (100 kode)</option>
-            <option value="BSJ-SD3">BSJ-SD3 (100 kode)</option>
-            <option value="BSJ-SD4">BSJ-SD4 (100 kode) - PALING LAKU</option>
-            <option value="BSJ-SD5">BSJ-SD5 (100 kode) - PALING LAKU</option>
-            <option value="BSJ-SD6">BSJ-SD6 (100 kode)</option>
-            <option value="BSJ-SD-LENGKAP">BSJ-LENGKAP 3600 soal (50 kode)</option>
-          </select>
-          <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} className="border-2 rounded-full px-4 py-2 font-bold bg-white">
-            <option value="SEMUA">Status: SEMUA</option>
-            <option value="BELUM TERJUAL">BELUM TERJUAL</option>
-            <option value="TERJUAL">TERJUAL</option>
-            <option value="AKTIF">AKTIF</option>
-          </select>
-          <div className="bg-white border-2 rounded-full px-4 py-2 font-bold">Total: {total} kode</div>
+        <div className="mt-5 bg-white rounded-[16px] border p-4 flex flex-wrap gap-3 items-end">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-[10px] font-black tracking-widest opacity-60">CARI KODE (contoh: 455E)</label>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Ketik code..." className="mt-1 w-full rounded-full border px-4 py-2.5 text-[13px]" />
+          </div>
+          <div>
+            <label className="text-[10px] font-black tracking-widest opacity-60">FILTER PAKET</label>
+            <select value={filterPaket} onChange={e=>setFilterPaket(e.target.value)} className="mt-1 rounded-full border px-3 py-2.5 text-[12px] font-bold">
+              <option value="all">Semua Paket</option>
+              {paketList.map(p=><option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] font-black tracking-widest opacity-60">STATUS</label>
+            <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)} className="mt-1 rounded-full border px-3 py-2.5 text-[12px] font-bold">
+              <option value="all">Semua</option>
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="USED">USED</option>
+            </select>
+          </div>
         </div>
 
-        {loading ? <div className="text-center py-20 font-black">Loading...</div> : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {kodes.map(k=>(
-              <div key={k.id} className="print-card bg-white rounded-2xl p-4 border-2 shadow-sm relative">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="text-[10px] font-black bg-black text-white px-2 py-1 rounded-full">{k.paket_kode}</div>
-                  <select value={k.status} onChange={e=>updateStatus(k.id, e.target.value)} className={`text-[10px] font-bold px-2 py-1 rounded-full border no-print ${k.status==='BELUM TERJUAL'?'bg-green-50 border-green-300':'bg-blue-50 border-blue-300'}`}>
-                    <option>BELUM TERJUAL</option>
-                    <option>TERJUAL</option>
-                    <option>AKTIF</option>
-                  </select>
-                  <div className="print:block hidden text-[10px] font-bold border px-2 py-1 rounded-full">{k.status}</div>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <img src="/mrh-logo.png" className="w-8 h-8 object-contain border rounded-lg p-1 bg-white"/>
-                  <div className="text-[11px] leading-tight"><b>MRH • BIMBEL SUPER JUARA</b><br/><span className="text-pink-600 font-bold">600 Soal HOTS Siap Juara!</span></div>
-                </div>
-                <div className="mt-3 text-[12px] font-bold">{k.paket_nama}</div>
-                <div className="mt-2 bg-[#fff5f7] border-2 border-dashed border-pink-200 rounded-xl p-2 text-center font-black tracking-widest text-[16px]">{k.kode}</div>
-                <div className="mt-2 flex justify-between items-center">
-                  <div className="text-[11px]"><span className="line-through text-gray-400">Rp {k.harga_normal?.toLocaleString('id-ID')}</span> <span className="font-black text-pink-600 ml-1">Rp {k.harga?.toLocaleString('id-ID')}</span></div>
-                  <div className="text-[10px] text-gray-500">Exp: {new Date(k.expired_at).toLocaleDateString('id-ID')}</div>
-                </div>
-                <div className="text-[9px] text-gray-400 mt-2 border-t pt-2">Cara pakai: bimbel.mrh-digitalhub.com/soal → Masukkan kode → Langsung belajar 600 soal</div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="mt-4 bg-white rounded-[16px] border overflow-hidden">
+          {loading ? <div className="p-10 text-center text-[13px] opacity-60">Loading vouchers...</div> : (
+            <div className="overflow-auto max-h-[70vh]">
+              <table className="w-full text-[12px]">
+                <thead className="bg-[#0E2A6B] text-white text-[11px] sticky top-0">
+                  <tr><th className="p-2.5 text-left">No</th><th className="p-2.5 text-left">Code</th><th className="p-2.5">Paket</th><th className="p-2.5">Nominal</th><th className="p-2.5">Status</th><th className="p-2.5">Durasi</th><th className="p-2.5">Aksi</th></tr>
+                </thead>
+                <tbody>
+                  {filtered.map((v,i)=>(
+                    <tr key={v.id} className="border-b hover:bg-[#FFFEF5]">
+                      <td className="p-2.5">{i+1}</td>
+                      <td className="p-2.5 font-mono font-black text-[#0E2A6B]">{v.code}</td>
+                      <td className="p-2.5 text-center font-bold">{v.paket}</td>
+                      <td className="p-2.5 text-center">Rp {v.nominal?.toLocaleString('id-ID')}</td>
+                      <td className="p-2.5 text-center"><span className={`px-2 py-1 rounded-full text-[10px] font-bold ${v.status==="AVAILABLE" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-600"}`}>{v.status}</span></td>
+                      <td className="p-2.5 text-center text-[11px]">{v.durasi_hari ? `${v.durasi_hari} hr` : "-"}</td>
+                      <td className="p-2.5 flex gap-1 justify-center">
+                        <button onClick={()=>{navigator.clipboard.writeText(v.code); alert("Kode disalin");}} className="rounded-full bg-black/5 px-2.5 py-1 text-[10px] font-bold">Copy</button>
+                        <button onClick={()=>copyText(v.code, v.paket, v.nominal)} className="rounded-full bg-[#FF8C00] text-white px-2.5 py-1 text-[10px] font-bold">WA</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filtered.length===0 && <div className="p-10 text-center text-[12px] opacity-50">Tidak ada hasil untuk filter "{search}" — klik Remove all filters di Supabase seperti di screenshot kamu, atau di sini ganti filter jadi Semua</div>}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 rounded-[16px] bg-[#0E2A6B] text-white p-4 text-[11px] leading-relaxed">
+          <b>Posisi cek tabel yang kamu tanya (info posisi untuk cek tabel):</b><br/>
+          1. Buka supabase.com → Login → Pilih project <b>bimbel-super-juara</b> (zmvwcennxyzzbmkarzuj)<br/>
+          2. Kiri: <b>Table Editor</b> → Cari tabel <b>public.vouchers</b> (paling bawah seperti di screenshot kamu)<br/>
+          3. Kalau kamu filter code ~ 455E dan muncul "The filters have returned no results" → klik <b>Remove all filters</b> (tombol putih di tengah) → semua voucher akan muncul lagi<br/>
+          4. Kolom penting: <b>code</b> (kode voucher), <b>paket</b> (bsj-sd1 ... bsj-sd6), <b>nominal</b> (17000), <b>status</b> (AVAILABLE/USED)
+        </div>
       </div>
     </div>
-  )
+  );
 }
