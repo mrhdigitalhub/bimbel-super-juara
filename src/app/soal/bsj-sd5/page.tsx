@@ -75,7 +75,7 @@ type Hasil = { id: string; kode_akses: string; kelas: string; mapel: string; bab
 
 export default function DashboardKelasPage() {
   const params = useParams();
-  const kelas = "bsj-sd5".toLowerCase();
+  const kelas = ((params.kelas as string) || "bsj-sd1").toLowerCase();
   const [kode, setKode] = useState("");
   const [hasil, setHasil] = useState<Hasil[]>([]);
   const [showPantau, setShowPantau] = useState(false);
@@ -103,25 +103,6 @@ export default function DashboardKelasPage() {
   }, [kelas]);
 
   const judulBabKelas = JUDUL_BAB_ALL[kelas] || JUDUL_BAB_ALL["bsj-sd1"];
-
-      const SLUG_MAP: any = {
-        "pai": "PAI & Budi Pekerti",
-        "pai-budi": "PAI & Budi Pekerti",
-        "bahasa-indonesia": "Bahasa Indonesia",
-        "bindo": "Bahasa Indonesia",
-        "matematika": "Matematika",
-        "mtk": "Matematika",
-        "ppkn": "PPKN",
-        "ipas": "IPAS"
-      };
-      const REVERSE_SLUG: any = {
-        "PAI & Budi Pekerti": "pai",
-        "Bahasa Indonesia": "bahasa-indonesia",
-        "Matematika": "matematika",
-        "PPKN": "ppkn",
-        "IPAS": "ipas"
-      };
-
   let totalBAB = 0;
   Object.values(judulBabKelas).forEach(function (m: any) { totalBAB += Object.keys(m).length; });
 
@@ -149,24 +130,24 @@ export default function DashboardKelasPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="font-bold text-base">{kelas.toUpperCase()} - Dashboard Score Lengkap {totalBAB} BAB - 5 Mapel</h1>
         <div className="flex gap-2 items-center">
-          <span className="text-[10px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode || "Belum ada"}</span>
-          <button onClick={function () { setShowPantau(!showPantau); }} className="text-xs bg-black text-white px-3 py-1.5 rounded-full font-bold">Pantauan Orang Tua {hasil.length > 0 ? "(" + hasil.length + ")" : ""}</button>
+          <span className="text-[16px] bg-green-100 px-2 py-1 rounded-full">Kode: {kode || "Belum ada"}</span>
+          <button onClick={function () { setShowPantau(!showPantau); }} className="text-[14px] bg-black text-white px-3 py-1.5 rounded-full font-bold">Pantauan Orang Tua {hasil.length > 0 ? "(" + hasil.length + ")" : ""}</button>
         </div>
       </div>
 
       {showPantau && (
         <div className="border rounded-xl bg-white p-4 mb-5">
-          <h2 className="font-bold text-sm mb-3">Pantauan Orang Tua - {kode} - {kelas.toUpperCase()}</h2>
-          {hasil.length === 0 ? <div className="text-sm text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan untuk {kelas.toUpperCase()} dengan kode {kode}</div> : (
+          <h2 className="font-bold text-[16px] mb-3">Pantauan Orang Tua - {kode} - {kelas.toUpperCase()}</h2>
+          {hasil.length === 0 ? <div className="text-[16px] text-gray-500 p-4 text-center border rounded-lg">Belum ada latihan untuk {kelas.toUpperCase()} dengan kode {kode}</div> : (
             <div className="border rounded-lg overflow-hidden">
-              <table className="w-full text-xs">
+              <table className="w-full text-[14px]">
                 <thead className="bg-gray-50"><tr><th className="p-2 text-left">Waktu</th><th className="p-2 text-left">Mapel BAB</th><th className="p-2 text-center">Score</th></tr></thead>
                 <tbody>{hasil.map(function (h) {
                   return (
                     <tr key={h.id} className="border-t">
                       <td className="p-2">{new Date(h.created_at).toLocaleString("id-ID")}</td>
-                      <td className="p-2"><b>{normalizeMapel(h.mapel)} BAB {h.bab}</b><br/><span className="text-[10px] text-gray-500">{JUDUL_BAB_ALL[kelas] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] ? JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] : ""}</span></td>
-                      <td className="p-2 text-center"><span className={h.score >= 70 ? "bg-green-100 text-green-700 px-2 py-1 rounded-full text-[10px] font-bold" : "bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-[10px] font-bold"}>{h.score}%</span></td>
+                      <td className="p-2"><b>{normalizeMapel(h.mapel)} BAB {h.bab}</b><br/><span className="text-[16px] text-gray-500">{JUDUL_BAB_ALL[kelas] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)] && JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] ? JUDUL_BAB_ALL[kelas][normalizeMapel(h.mapel)][String(h.bab)] : ""}</span></td>
+                      <td className="p-2 text-center"><span className={h.score >= 70 ? "bg-green-100 text-green-700 px-2 py-1 rounded-full text-[16px] font-bold" : "bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-[16px] font-bold"}>{h.score}%</span></td>
                     </tr>
                   );
                 })}</tbody>
@@ -178,8 +159,8 @@ export default function DashboardKelasPage() {
 
       <div className="rounded-2xl bg-gradient-to-r from-purple-600 to-blue-600 text-white p-5 mb-6">
         <div className="flex justify-between items-center">
-          <div><div className="text-xs opacity-80">Total Score Kelas - {kelas.toUpperCase()} {kode ? `(Voucher: ${kode})` : ``}</div><div className="text-4xl font-bold">{rata}%</div><div className="text-xs mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai - Benar {totalBenar} / {totalSoal || 0}</div></div>
-          <div className="text-center"><div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div><div className="text-[10px] mt-1 opacity-80">Progress {kelas.toUpperCase()}</div></div>
+          <div><div className="text-[14px] opacity-80">Total Score Kelas - {kelas.toUpperCase()} {kode ? `(Voucher: ${kode})` : ``}</div><div className="text-4xl font-bold">{rata}%</div><div className="text-[14px] mt-1 opacity-80">{selesai} / {totalBAB} BAB selesai - Benar {totalBenar} / {totalSoal || 0}</div></div>
+          <div className="text-center"><div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">{rata}%</div><div className="text-[16px] mt-1 opacity-80">Progress {kelas.toUpperCase()}</div></div>
         </div>
         <div className="w-full bg-white/20 h-2 rounded-full mt-4"><div className="bg-white h-2 rounded-full" style={{ width: (totalBAB ? (selesai / totalBAB) * 100 : 0) + "%" }} /></div>
       </div>
@@ -198,7 +179,7 @@ export default function DashboardKelasPage() {
             <div className={"flex justify-between items-center p-3 rounded-lg mb-3 border " + w.header}>
               <div className="flex items-center gap-3">
                 <img src={iconPath} alt={mapel} className="w-10 h-10 object-contain" />
-                <div><div className="font-bold text-sm">{mapel}</div><div className="text-[10px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div></div>
+                <div><div className="font-bold text-[16px]">{mapel}</div><div className="text-[16px] opacity-70">{doneMapel}/{totalMapel} BAB - Rata {rataMapel}% - {w.pastel}</div></div>
               </div>
               <div className="w-24 h-1.5 bg-white/70 rounded-full"><div className="bg-black/20 h-1.5 rounded-full" style={{ width: (totalMapel ? (doneMapel / totalMapel) * 100 : 0) + "%" }} /></div>
             </div>
@@ -208,9 +189,9 @@ export default function DashboardKelasPage() {
                 const judul = babs[babStr];
                 const skor = hasil.find(function (h) { return normalizeMapel(h.mapel) === mapel && Number(h.bab) === bab; });
                 return (
-                  <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + (REVERSE_SLUG[mapel]||encodeURIComponent(mapel)) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
-                    <div className="pr-2"><div className="text-[10px] text-gray-500">BAB {bab}</div><div className="font-bold text-xs leading-tight">{judul}</div><div className="text-[10px] text-gray-500 mt-1">{skor ? "Benar " + skor.benar : "Belum dikerjakan"}</div></div>
-                    <div className={skor ? (skor.score >= 70 ? "bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-full font-bold" : "bg-yellow-100 text-yellow-700 text-[10px] px-2 py-1 rounded-full font-bold") : "bg-gray-100 text-gray-600 text-[10px] px-2 py-1 rounded-full font-bold"}>{skor ? skor.score + "%" : "0%"}</div>
+                  <a key={mapel + "-" + bab} href={"/soal/" + kelas + "/latihan?mapel=" + encodeURIComponent(mapel) + "&bab=" + bab} className="bg-white border rounded-lg p-3 hover:border-blue-400 flex justify-between items-start">
+                    <div className="pr-2"><div className="text-[16px] text-gray-500">BAB {bab}</div><div className="font-bold text-[14px] leading-tight">{judul}</div><div className="text-[16px] text-gray-500 mt-1">{skor ? "Benar " + skor.benar : "Belum dikerjakan"}</div></div>
+                    <div className={skor ? (skor.score >= 70 ? "bg-green-100 text-green-700 text-[16px] px-2 py-1 rounded-full font-bold" : "bg-yellow-100 text-yellow-700 text-[16px] px-2 py-1 rounded-full font-bold") : "bg-gray-100 text-gray-600 text-[16px] px-2 py-1 rounded-full font-bold"}>{skor ? skor.score + "%" : "0%"}</div>
                   </a>
                 );
               })}

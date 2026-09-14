@@ -123,10 +123,10 @@ function LatihanContent(){
         <div className="bg-white border rounded-2xl p-6 text-center">
           <div className="text-5xl font-black text-blue-600">{score}%</div>
           <div className="mt-2 font-bold">{kelas.toUpperCase()} - {mapel} BAB {bab}</div>
-          <div className="text-sm opacity-60">Benar {benar} / {soal.length} • Kode: {kode||'Tanpa Kode'}</div>
+          <div className="text-[16px] opacity-60">Benar {benar} / {soal.length} • Kode: {kode||'Tanpa Kode'}</div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <a href={`/soal/${kelas}`} className="bg-black text-white rounded-full py-3 text-sm font-bold">Kembali Dashboard</a>
-            <button onClick={()=>{setSelesai(false); setJawab(Array(soal.length).fill(-1));}} className="border rounded-full py-3 text-sm font-bold">Ulangi</button>
+            <a href={`/soal/${kelas}`} className="bg-black text-white rounded-full py-3 text-[16px] font-bold">Kembali Dashboard</a>
+            <button onClick={()=>{setSelesai(false); setJawab(Array(soal.length).fill(-1));}} className="border rounded-full py-3 text-[16px] font-bold">Ulangi</button>
           </div>
         </div>
         <div className="mt-4 space-y-3">
@@ -137,9 +137,9 @@ function LatihanContent(){
             const ok=j===kunci;
             return (
               <div key={i} className={`border rounded-xl p-4 ${ok?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}`}>
-                <div className="font-bold text-sm">{i+1}. {s.soal||s.pertanyaan}</div>
-                <div className="mt-2 text-xs">Jawab: {opsi[j]||'-'} {ok?'✅':'❌'} | Kunci: {opsi[kunci]}</div>
-                {s.penjelasan && <div className="mt-2 text-[11px] opacity-70">Pembahasan: {s.penjelasan}</div>}
+                <div className="font-bold text-[18px]">{i+1}. {s.soal||s.pertanyaan}</div>
+                <div className="mt-2 text-[14px]">Jawab: {opsi[j]||'-'} {ok?'✅':'❌'} | Kunci: {opsi[kunci]}</div>
+                {s.penjelasan && <div className="mt-2 text-[15px] opacity-70">Pembahasan: {s.penjelasan}</div>}
               </div>
             );
           })}
@@ -150,24 +150,24 @@ function LatihanContent(){
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-[#fffcf5] min-h-screen">
-      <a href={`/soal/${kelas}`} className="text-xs font-bold">← Kembali ke Dashboard {kelas.toUpperCase()} - 30 BAB</a>
+      <a href={`/soal/${kelas}`} className="text-[14px] font-bold">← Kembali ke Dashboard {kelas.toUpperCase()} - 30 BAB</a>
       <div className="mt-3 bg-white border rounded-xl p-4 flex justify-between items-center">
-        <div><div className="font-black text-sm">{kelas.toUpperCase()} - {mapel} BAB {bab} - {soal.length} SOAL</div><div className="text-[11px] opacity-60">Kode: {kode||'Belum ada'} • Pilih jawaban A-D</div></div>
-        <div className="text-xs bg-blue-100 px-3 py-1 rounded-full font-bold">{jawab.filter(j=>j!==-1).length}/{soal.length}</div>
+        <div><div className="font-black text-[16px]">{kelas.toUpperCase()} - {mapel} BAB {bab} - {soal.length} SOAL</div><div className="text-[15px] opacity-60">Kode: {kode||'Belum ada'} • Pilih jawaban A-D</div></div>
+        <div className="text-[14px] bg-blue-100 px-3 py-1 rounded-full font-bold">{jawab.filter(j=>j!==-1).length}/{soal.length}</div>
       </div>
       <div className="mt-4 space-y-4">
         {soal.map((s,i)=>{
           const opsi=getOpsi(s);
           return (
             <div key={s.id||i} className="bg-white border rounded-xl p-4">
-              <div className="font-bold text-[14px]">{i+1}. {s.soal||s.pertanyaan}</div>
+              <div className="font-bold text-[18px]">{i+1}. {s.soal||s.pertanyaan}</div>
               <div className="mt-3 grid gap-2">
                 {opsi.length>0 ? opsi.map((o:string,oi:number)=>(
-                  <button key={oi} onClick={()=>handlePilih(i,oi)} className={`text-left border rounded-lg px-3 py-2.5 text-sm ${jawab[i]===oi?'bg-blue-600 text-white border-blue-600 font-bold':'bg-gray-50 hover:bg-gray-100'}`}>
+                  <button key={oi} onClick={()=>handlePilih(i,oi)} className={`text-left border rounded-lg px-3 py-2.5 text-[16px] ${jawab[i]===oi?'bg-blue-600 text-white border-blue-600 font-bold':'bg-gray-50 hover:bg-gray-100'}`}>
                     <span className="font-black mr-2">{String.fromCharCode(65+oi)}.</span>{o}
                   </button>
                 )) : (
-                  <div className="text-xs opacity-60">Opsi tidak ditemukan di DB. Cek kolom opsi_a/b/c/d. Soal: {JSON.stringify(s).slice(0,150)}</div>
+                  <div className="text-[14px] opacity-60">Opsi tidak ditemukan di DB. Cek kolom opsi_a/b/c/d. Soal: {JSON.stringify(s).slice(0,150)}</div>
                 )}
               </div>
             </div>
@@ -175,7 +175,7 @@ function LatihanContent(){
         })}
       </div>
       <button onClick={handleSelesai} disabled={jawab.includes(-1)} className="mt-6 w-full bg-[#FF8C00] text-white font-black py-4 rounded-full disabled:opacity-40 shadow">✅ Selesai & Simpan Score →</button>
-      <div className="mt-3 text-[11px] opacity-50 text-center">Score akan masuk ke Pantauan Orang Tua di dashboard {kelas.toUpperCase()}</div>
+      <div className="mt-3 text-[15px] opacity-50 text-center">Score akan masuk ke Pantauan Orang Tua di dashboard {kelas.toUpperCase()}</div>
     </div>
   );
 }
